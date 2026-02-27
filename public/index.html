@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Crop Intelligence Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .results h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .results-content {
+            color: #555;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .language-toggle {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .language-toggle button {
+            padding: 8px 20px;
+            margin: 0 5px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .language-toggle button.active {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌾 AI Crop Intelligence Platform</h1>
+        <p class="subtitle">Get AI-powered crop recommendations for your farm</p>
+
+        <div class="language-toggle">
+            <button onclick="setLanguage('en')" class="active" id="btn-en">English</button>
+            <button onclick="setLanguage('hi')" id="btn-hi">हिंदी</button>
+        </div>
+
+        <form id="farmerForm">
+            <div class="form-group">
+                <label for="tdsValue">Water TDS Value (ppm)</label>
+                <input type="number" id="tdsValue" name="tdsValue" min="0" max="5000" required 
+                       placeholder="Enter TDS value (0-5000)">
+            </div>
+
+            <div class="form-group">
+                <label for="phLevel">Soil pH Level</label>
+                <input type="number" id="phLevel" name="phLevel" min="0" max="14" step="0.1" required 
+                       placeholder="Enter pH level (0-14)">
+            </div>
+
+            <div class="form-group">
+                <label for="borewellDepth">Borewell Depth (meters)</label>
+                <input type="number" id="borewellDepth" name="borewellDepth" min="0" max="500" required 
+                       placeholder="Enter borewell depth">
+            </div>
+
+            <div class="form-group">
+                <label for="soilType">Soil Type</label>
+                <select id="soilType" name="soilType" required>
+                    <option value="">Select soil type</option>
+                    <option value="clay">Clay (चिकनी मिट्टी)</option>
+                    <option value="sandy">Sandy (रेतीली मिट्टी)</option>
+                    <option value="loamy">Loamy (दोमट मिट्टी)</option>
+                    <option value="silty">Silty (गाद मिट्टी)</option>
+                    <option value="peaty">Peaty (पीटयुक्त मिट्टी)</option>
+                    <option value="chalky">Chalky (चाकयुक्त मिट्टी)</option>
+                    <option value="laterite">Laterite (लैटेराइट मिट्टी)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">Get Recommendations</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #666;">Analyzing your farm data...</p>
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="results" id="results">
+            <h2>📊 Recommendations</h2>
+            <div class="results-content" id="resultsContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentLanguage = 'en';
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            document.getElementById('btn-hi').classList.toggle('active', lang === 'hi');
+        }
+
+        document.getElementById('farmerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                tdsValue: parseFloat(document.getElementById('tdsValue').value),
+                phLevel: parseFloat(document.getElementById('phLevel').value),
+                borewellDepth: parseFloat(document.getElementById('borewellDepth').value),
+                soilType: document.getElementById('soilType').value,
+                language: currentLanguage
+            };
+
+            // Show loading, hide results and errors
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('error').classList.remove('show');
+            document.getElementById('submitBtn').disabled = true;
+
+            try {
+                const apiUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000/api/recommendations'
+                    : '/api/recommendations';
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('resultsContent').textContent = data.recommendations;
+                    document.getElementById('results').classList.add('show');
+                } else {
+                    throw new Error(data.error || 'Failed to get recommendations');
+                }
+            } catch (error) {
+                document.getElementById('error').textContent = 'Error: ' + error.message;
+                document.getElementById('error').classList.add('show');
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('submitBtn').disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

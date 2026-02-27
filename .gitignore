@@ -1,2 +1,7 @@
 .vscode
 .config.kiro
+node_modules
+.env
+.DS_Store
+*.log
+temp-downloads/
