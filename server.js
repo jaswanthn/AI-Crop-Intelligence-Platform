@@ -184,13 +184,18 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🌾 AI-Crop-Intelligence-Platform API running on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔗 API endpoints:`);
-  console.log(`   POST /api/recommendations - Get crop recommendations`);
-  console.log(`   POST /api/crop-info - Get specific crop information`);
-  console.log(`   POST /api/query - General agricultural query`);
-  console.log(`   GET  /api/soil-types - Get available soil types`);
-});
+// Start server (only if not in Vercel serverless environment)
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`🌾 AI-Crop-Intelligence-Platform API running on port ${PORT}`);
+    console.log(`📍 Health check: http://localhost:${PORT}/health`);
+    console.log(`🔗 API endpoints:`);
+    console.log(`   POST /api/recommendations - Get crop recommendations`);
+    console.log(`   POST /api/crop-info - Get specific crop information`);
+    console.log(`   POST /api/query - General agricultural query`);
+    console.log(`   GET  /api/soil-types - Get available soil types`);
+  });
+}
+
+// Export for Vercel
+module.exports = app;
