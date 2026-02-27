@@ -9,8 +9,8 @@
     "test": "echo \"No tests configured yet\""
   },
   "engines": {
-    "node": "18.x",
-    "npm": "9.x"
+    "node": "20.x",
+    "npm": "10.x"
   },
   "keywords": ["agriculture", "ai", "bedrock", "farmers"],
   "author": "",
