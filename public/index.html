@@ -177,7 +177,65 @@
         .results-content {
             color: #555;
             line-height: 1.8;
-            white-space: pre-wrap;
+        }
+        
+        .results-content h3 {
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+        
+        .results-content h4 {
+            color: #444;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .results-content ul, .results-content ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        
+        .results-content li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+        
+        .results-content strong {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .results-content p {
+            margin: 12px 0;
+        }
+        
+        .results-content .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        
+        .results-content .crop-name {
+            color: #4caf50;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        .results-content .score {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.95em;
         }
 
         .loading {
@@ -511,7 +569,6 @@
         <div class="tabs">
             <button class="tab active" onclick="switchTab('recommendations')">🌱 Crop Recommendations</button>
             <button class="tab" onclick="switchTab('calendar')">📅 Sowing Calendar</button>
-            <button class="tab" onclick="switchTab('irrigation')">💧 Irrigation Schedule</button>
             <button class="tab" onclick="switchTab('nutrients')">🧪 Fertilizer Calculator</button>
             <button class="tab" onclick="switchTab('risks')">⚠️ Risk Assessment</button>
         </div>
@@ -578,7 +635,7 @@
                         🚀 Generate Complete Analysis for Selected Crop
                     </button>
                     <p style="margin-top: 10px; color: #666; font-size: 12px;">
-                        This will generate: Sowing Calendar, Irrigation Schedule, Fertilizer Plan, and Risk Assessment
+                        This will generate: Sowing Calendar, Fertilizer Plan, and Risk Assessment
                     </p>
                 </div>
             </div>
@@ -688,58 +745,7 @@
             </div>
         </div>
 
-        <!-- Tab 3: Irrigation Schedule -->
-        <div id="tab-irrigation" class="tab-content">
-            <div class="info-box" id="irrigation-info">
-                💧 Get day-by-day irrigation schedule optimized for each crop growth stage
-                <div id="irrigation-autofill" style="display:none; margin-top:10px; color:#2196f3; font-weight:600;">
-                    ✅ Auto-filled from your farm data
-                </div>
-            </div>
-
-            <form id="irrigationForm">
-                <div class="form-group">
-                    <label for="irrigationCrop">Crop Name</label>
-                    <input type="text" id="irrigationCrop" required placeholder="e.g., Wheat, Rice, Cotton">
-                </div>
-
-                <div class="form-group">
-                    <label for="growthStage">Growth Stage</label>
-                    <select id="growthStage" required>
-                        <option value="">Select growth stage</option>
-                        <option value="germination">Germination</option>
-                        <option value="vegetative">Vegetative</option>
-                        <option value="flowering">Flowering</option>
-                        <option value="maturity">Maturity</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="irrigationLocation">Location ID</label>
-                    <input type="text" id="irrigationLocation" required placeholder="e.g., Maharashtra-Pune">
-                </div>
-
-                <button type="submit" class="btn">Generate Irrigation Schedule</button>
-            </form>
-
-            <div class="loading" id="loading-irrigation">
-                <div class="spinner"></div>
-                <p style="margin-top: 15px; color: #666;">Generating irrigation schedule...</p>
-            </div>
-
-            <div class="error" id="error-irrigation"></div>
-
-            <div class="results" id="results-irrigation">
-                <h2>💧 Irrigation Schedule</h2>
-                <div class="results-content" id="content-irrigation"></div>
-                <div class="export-buttons">
-                    <button class="btn btn-secondary" onclick="exportIrrigation('pdf')">📄 Download PDF</button>
-                    <button class="btn btn-secondary" onclick="exportIrrigation('ical')">📆 Download iCal</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab 4: Fertilizer Calculator -->
+        <!-- Tab 3: Fertilizer Calculator -->
         <div id="tab-nutrients" class="tab-content">
             <div class="info-box" id="nutrients-info">
                 🧪 Calculate precise fertilizer doses based on soil test results. Prevents Urea over-application.
@@ -845,7 +851,6 @@
     <script>
         let currentLanguage = 'en';
         let currentCalendarId = null;
-        let currentIrrigationId = null;
         
         // Calendar variables
         let calendar = null;
@@ -967,7 +972,6 @@
                 // Generate all analyses in parallel
                 const results = await Promise.allSettled([
                     generateSowingCalendarAuto(selectedCrop),
-                    generateIrrigationScheduleAuto(selectedCrop),
                     generateNutrientPlanAuto(selectedCrop),
                     generateRiskAssessmentAuto(selectedCrop)
                 ]);
@@ -978,11 +982,11 @@
                     console.error('Some analyses failed:', failures);
                     btn.textContent = '⚠️ Partial Success - Check Results';
                     btn.style.background = '#ff9800';
-                    alert(`Generated ${4 - failures.length} out of 4 analyses.\n\nFailed: ${failures.length}\n\nCheck the tabs for available results.`);
+                    alert(`Generated ${3 - failures.length} out of 3 analyses.\n\nFailed: ${failures.length}\n\nCheck the tabs for available results.`);
                 } else {
                     btn.textContent = '✅ Complete Analysis Generated!';
                     btn.style.background = '#4caf50';
-                    alert(`Complete analysis for ${selectedCrop} has been generated!\n\nCheck the other tabs:\n📅 Sowing Calendar\n💧 Irrigation Schedule\n🧪 Fertilizer Calculator\n⚠️ Risk Assessment`);
+                    alert(`Complete analysis for ${selectedCrop} has been generated!\n\nCheck the other tabs:\n📅 Sowing Calendar\n🧪 Fertilizer Calculator\n⚠️ Risk Assessment`);
                 }
                 
             } catch (error) {
@@ -1066,46 +1070,6 @@
             }
         }
         
-        // Auto-generate irrigation schedule
-        async function generateIrrigationScheduleAuto(cropName) {
-            try {
-                const formData = {
-                    cropName: cropName,
-                    growthStage: 'vegetative',
-                    locationId: farmerData.locationId,
-                    language: currentLanguage
-                };
-
-                const apiUrl = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3000/api/v1/calendar/irrigation'
-                    : '/api/v1/calendar/irrigation';
-
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                if (data.success) {
-                    currentIrrigationId = data.schedule.scheduleId;
-                    document.getElementById('content-irrigation').textContent = data.schedule.recommendations;
-                    document.getElementById('results-irrigation').classList.add('show');
-                    if (document.getElementById('irrigation-autofill')) {
-                        document.getElementById('irrigation-autofill').style.display = 'block';
-                    }
-                } else {
-                    throw new Error(data.error || 'Failed to generate irrigation schedule');
-                }
-            } catch (error) {
-                console.error('Irrigation schedule error:', error);
-                throw error;
-            }
-        }
         
         // Auto-generate nutrient management plan
         async function generateNutrientPlanAuto(cropName) {
@@ -1137,7 +1101,8 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    document.getElementById('content-nutrients').textContent = data.plan.recommendations;
+                    const formattedContent = formatAsRichText(data.plan.recommendations);
+                    document.getElementById('content-nutrients').innerHTML = formattedContent;
                     document.getElementById('results-nutrients').classList.add('show');
                 } else {
                     throw new Error(data.error || 'Failed to generate nutrient plan');
@@ -1174,7 +1139,8 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    document.getElementById('content-risks').textContent = data.assessment.recommendations;
+                    const formattedContent = formatAsRichText(data.assessment.recommendations);
+                    document.getElementById('content-risks').innerHTML = formattedContent;
                     document.getElementById('results-risks').classList.add('show');
                 } else {
                     throw new Error(data.error || 'Failed to generate risk assessment');
@@ -1527,12 +1493,6 @@
             }
             document.getElementById('calendarLocation').value = farmerData.locationId;
             
-            // Auto-populate Irrigation Schedule
-            if (cropToUse) {
-                document.getElementById('irrigationCrop').value = cropToUse;
-            }
-            document.getElementById('irrigationLocation').value = farmerData.locationId;
-            
             // Auto-populate Fertilizer Calculator
             if (cropToUse) {
                 document.getElementById('nutrientsCrop').value = cropToUse;
@@ -1582,9 +1542,55 @@
         function hideLoading(section) {
             document.getElementById(`loading-${section}`).classList.remove('show');
         }
+        
+        // Format AI text response as rich HTML
+        function formatAsRichText(text) {
+            if (!text) return '';
+            
+            let html = text;
+            
+            // Convert numbered lists (1. 2. 3.)
+            html = html.replace(/^(\d+)\.\s+(.+)$/gm, '<li><strong>$2</strong></li>');
+            
+            // Convert bullet points (- or *)
+            html = html.replace(/^[-*]\s+(.+)$/gm, '<li>$1</li>');
+            
+            // Wrap consecutive <li> in <ul>
+            html = html.replace(/(<li>.*?<\/li>\n?)+/gs, '<ul>$&</ul>');
+            
+            // Convert **bold** to <strong>
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            
+            // Convert section headers (lines ending with :)
+            html = html.replace(/^([A-Z][^:\n]{3,50}):$/gm, '<h3>$1</h3>');
+            
+            // Highlight crop names (capitalized words followed by crop/Crop)
+            html = html.replace(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(crop|Crop)\b/g, '<span class="crop-name">$1</span> $2');
+            
+            // Highlight scores and percentages
+            html = html.replace(/(\d+(?:\.\d+)?%|\d+\/\d+|Score:\s*\d+)/g, '<span class="score">$1</span>');
+            
+            // Convert double line breaks to paragraphs
+            html = html.split('\n\n').map(para => {
+                if (para.trim() && !para.startsWith('<')) {
+                    return `<p>${para.trim()}</p>`;
+                }
+                return para;
+            }).join('\n');
+            
+            // Highlight important keywords
+            html = html.replace(/\b(Recommended|Important|Note|Warning|Optimal|Best|High|Low|Critical)\b/gi, 
+                '<span class="highlight">$1</span>');
+            
+            // Convert remaining single line breaks to <br> (but not inside HTML tags)
+            html = html.replace(/\n(?![<\s])/g, '<br>\n');
+            
+            return html;
+        }
 
         function showResults(section, content) {
-            document.getElementById(`content-${section}`).textContent = content;
+            const formattedContent = formatAsRichText(content);
+            document.getElementById(`content-${section}`).innerHTML = formattedContent;
             document.getElementById(`results-${section}`).classList.add('show');
         }
 
@@ -1711,49 +1717,8 @@
             }
         });
 
-        // Tab 3: Irrigation Schedule
-        document.getElementById('irrigationForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            showLoading('irrigation');
 
-            try {
-                const formData = {
-                    cropName: document.getElementById('irrigationCrop').value,
-                    growthStage: document.getElementById('growthStage').value,
-                    locationId: document.getElementById('irrigationLocation').value,
-                    language: currentLanguage
-                };
-
-                const apiUrl = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3000/api/v1/calendar/irrigation'
-                    : '/api/v1/calendar/irrigation';
-
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-
-                if (data.success) {
-                    currentIrrigationId = data.schedule.scheduleId;
-                    showResults('irrigation', data.schedule.recommendations);
-                } else {
-                    throw new Error(data.error || 'Failed to generate schedule');
-                }
-            } catch (error) {
-                showError('irrigation', error.message);
-            } finally {
-                hideLoading('irrigation');
-            }
-        });
-
-        // Tab 4: Fertilizer Calculator
+        // Tab 3: Fertilizer Calculator
         document.getElementById('nutrientsForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             showLoading('nutrients');
@@ -1848,14 +1813,6 @@
                 return;
             }
             window.open(getApiUrl(`/api/v1/calendar/export/${currentCalendarId}?format=${format}`), '_blank');
-        }
-
-        function exportIrrigation(format) {
-            if (!currentIrrigationId) {
-                alert('Please generate an irrigation schedule first');
-                return;
-            }
-            window.open(getApiUrl(`/api/v1/calendar/export/${currentIrrigationId}?format=${format}`), '_blank');
         }
     </script>
 </body>
