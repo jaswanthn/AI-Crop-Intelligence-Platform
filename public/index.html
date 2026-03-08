@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Crop Intelligence Platform</title>
+    
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+    
+    <!-- FullCalendar JS -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    
     <style>
         * {
             margin: 0;
@@ -248,6 +255,247 @@
                 min-width: 100%;
             }
         }
+
+        /* Calendar View Styles */
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-view {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-view.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-view:hover {
+            transform: translateY(-2px);
+        }
+
+        #fullcalendar {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        .calendar-container, .timeline-container, .text-container {
+            margin-top: 20px;
+        }
+
+        /* Timeline Styles */
+        .timeline-event {
+            display: flex;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .timeline-event:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateX(5px);
+        }
+
+        .timeline-date {
+            min-width: 140px;
+            font-weight: 600;
+            color: #667eea;
+            font-size: 14px;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .timeline-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Event Type Colors */
+        .fc-event.event-sowing { 
+            background-color: #4caf50 !important; 
+            border-color: #4caf50 !important;
+        }
+        .fc-event.event-irrigation { 
+            background-color: #2196f3 !important; 
+            border-color: #2196f3 !important;
+        }
+        .fc-event.event-fertilizer { 
+            background-color: #ff9800 !important; 
+            border-color: #ff9800 !important;
+        }
+        .fc-event.event-pest-control { 
+            background-color: #f44336 !important; 
+            border-color: #f44336 !important;
+        }
+        .fc-event.event-harvest { 
+            background-color: #9c27b0 !important; 
+            border-color: #9c27b0 !important;
+        }
+        .fc-event.event-monsoon { 
+            background-color: #00bcd4 !important; 
+            border-color: #00bcd4 !important;
+        }
+
+        /* Event Legend */
+        .event-legend {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            font-size: 13px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        /* Event Modal */
+        .event-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .event-modal.show {
+            display: flex;
+        }
+
+        .event-modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .event-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .event-modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .event-modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #666;
+            line-height: 1;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .event-modal-close:hover {
+            color: #333;
+        }
+
+        .event-modal-body {
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .event-modal-body p {
+            margin-bottom: 15px;
+        }
+
+        .event-modal-body strong {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .view-toggle {
+                flex-direction: column;
+            }
+            
+            .btn-view {
+                width: 100%;
+            }
+            
+            .event-legend {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            #fullcalendar {
+                padding: 10px;
+            }
+            
+            .fc-toolbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .fc-toolbar-chunk {
+                display: flex;
+                justify-content: center;
+            }
+
+            .timeline-date {
+                min-width: 100px;
+                font-size: 12px;
+            }
+
+            .timeline-title {
+                font-size: 14px;
+            }
+
+            .timeline-description {
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -368,11 +616,75 @@
 
             <div class="results" id="results-calendar">
                 <h2>📅 Sowing Calendar</h2>
-                <div class="results-content" id="content-calendar"></div>
+                
+                <!-- View Toggle -->
+                <div class="view-toggle">
+                    <button onclick="switchCalendarView('calendar')" class="btn-view active" id="btn-calendar-view">
+                        📅 Calendar View
+                    </button>
+                    <button onclick="switchCalendarView('timeline')" class="btn-view" id="btn-timeline-view">
+                        📊 Timeline View
+                    </button>
+                    <button onclick="switchCalendarView('text')" class="btn-view" id="btn-text-view">
+                        📝 Text View
+                    </button>
+                </div>
+
+                <!-- Event Legend -->
+                <div class="event-legend">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #4caf50;"></span>
+                        <span>Sowing</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #2196f3;"></span>
+                        <span>Irrigation</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #ff9800;"></span>
+                        <span>Fertilizer</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #00bcd4;"></span>
+                        <span>Monsoon</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #9c27b0;"></span>
+                        <span>Harvest</span>
+                    </div>
+                </div>
+
+                <!-- Calendar Container -->
+                <div id="calendar-container" class="calendar-container" style="display: block;">
+                    <div id="fullcalendar"></div>
+                </div>
+
+                <!-- Timeline Container -->
+                <div id="timeline-container" class="timeline-container" style="display: none;">
+                    <div id="timeline-events"></div>
+                </div>
+
+                <!-- Text Container (Original) -->
+                <div id="text-container" class="text-container" style="display: none;">
+                    <div class="results-content" id="content-calendar"></div>
+                </div>
+
+                <!-- Export Buttons -->
                 <div class="export-buttons">
                     <button class="btn btn-secondary" onclick="exportCalendar('pdf')">📄 Download PDF</button>
                     <button class="btn btn-secondary" onclick="exportCalendar('ical')">📆 Download iCal</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Event Details Modal -->
+        <div id="event-modal" class="event-modal" onclick="if(event.target === this) closeEventModal()">
+            <div class="event-modal-content">
+                <div class="event-modal-header">
+                    <h3 id="modal-title"></h3>
+                    <button class="event-modal-close" onclick="closeEventModal()">×</button>
+                </div>
+                <div class="event-modal-body" id="modal-body"></div>
             </div>
         </div>
 
@@ -534,6 +846,11 @@
         let currentLanguage = 'en';
         let currentCalendarId = null;
         let currentIrrigationId = null;
+        
+        // Calendar variables
+        let calendar = null;
+        let calendarEvents = [];
+        let currentCalendarView = 'calendar';
         
         // Store farmer's input data for auto-population
         let farmerData = {
@@ -841,6 +1158,335 @@
             }
         }
         
+        // ============================================
+        // CALENDAR FUNCTIONS
+        // ============================================
+        
+        // Initialize FullCalendar
+        function initializeCalendar() {
+            const calendarEl = document.getElementById('fullcalendar');
+            
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listMonth'
+                },
+                events: calendarEvents,
+                eventClick: function(info) {
+                    info.jsEvent.preventDefault();
+                    showEventDetails(info.event);
+                },
+                eventDidMount: function(info) {
+                    info.el.title = info.event.extendedProps.description || info.event.title;
+                },
+                height: 'auto'
+            });
+            
+            calendar.render();
+        }
+        
+        // Parse AI response and extract events
+        function parseCalendarEvents(aiResponse, cropName) {
+            const events = [];
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth();
+            
+            // Helper function to parse dates
+            function parseDate(day, month) {
+                const monthMap = {
+                    'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
+                    'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11,
+                    'january': 0, 'february': 1, 'march': 2, 'april': 3, 'may': 4, 'june': 5,
+                    'july': 6, 'august': 7, 'september': 8, 'october': 9, 'november': 10, 'december': 11
+                };
+                
+                const monthIndex = monthMap[month.toLowerCase().substring(0, 3)];
+                return new Date(currentYear, monthIndex, parseInt(day));
+            }
+            
+            // Try to extract sowing windows with multiple patterns
+            let sowingMatch = aiResponse.match(/sowing.*?(\d{1,2})\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s*[-–to]+\s*(\d{1,2})\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i);
+            
+            // Alternative pattern: "June 15 to July 15" or "15th June to 15th July"
+            if (!sowingMatch) {
+                sowingMatch = aiResponse.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s*(\d{1,2})[a-z]*\s*[-–to]+\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s*(\d{1,2})/i);
+                if (sowingMatch) {
+                    // Swap order for this pattern
+                    sowingMatch = [sowingMatch[0], sowingMatch[2], sowingMatch[1], sowingMatch[4], sowingMatch[3]];
+                }
+            }
+            
+            // FALLBACK: If no dates found, generate sample calendar based on current month
+            if (!sowingMatch) {
+                console.warn('No sowing dates found in AI response, generating sample calendar');
+                
+                // Generate sample sowing window (next month, 15-21)
+                const nextMonth = (currentMonth + 1) % 12;
+                const sowingStart = new Date(currentYear, nextMonth, 15);
+                const sowingEnd = new Date(currentYear, nextMonth, 21);
+                
+                events.push({
+                    title: `🌱 Sowing Window - ${cropName}`,
+                    start: sowingStart,
+                    end: sowingEnd,
+                    className: 'event-sowing',
+                    description: 'Recommended sowing period (sample dates - check AI response for actual recommendations)',
+                    allDay: true
+                });
+                
+                // Monsoon onset (10th of next month)
+                events.push({
+                    title: '🌧️ Monsoon Onset',
+                    start: new Date(currentYear, nextMonth, 10),
+                    className: 'event-monsoon',
+                    description: 'Expected monsoon arrival (sample date)',
+                    allDay: true
+                });
+                
+                // Generate irrigation schedule
+                for (let i = 1; i <= 12; i++) {
+                    const irrigationDate = new Date(sowingStart);
+                    irrigationDate.setDate(irrigationDate.getDate() + (i * 7));
+                    
+                    events.push({
+                        title: `💧 Irrigation Day ${i}`,
+                        start: irrigationDate,
+                        className: 'event-irrigation',
+                        description: `Scheduled irrigation - Week ${i} after sowing`,
+                        allDay: true
+                    });
+                }
+                
+                // Fertilizer events
+                events.push({
+                    title: '🧪 Basal Fertilizer',
+                    start: sowingStart,
+                    className: 'event-fertilizer',
+                    description: 'Apply basal dose of NPK fertilizer at sowing',
+                    allDay: true
+                });
+                
+                const topDress1 = new Date(sowingStart);
+                topDress1.setDate(topDress1.getDate() + 30);
+                events.push({
+                    title: '🧪 Top Dressing 1',
+                    start: topDress1,
+                    className: 'event-fertilizer',
+                    description: 'First top dressing - Urea application (30 days after sowing)',
+                    allDay: true
+                });
+                
+                const topDress2 = new Date(sowingStart);
+                topDress2.setDate(topDress2.getDate() + 60);
+                events.push({
+                    title: '🧪 Top Dressing 2',
+                    start: topDress2,
+                    className: 'event-fertilizer',
+                    description: 'Second top dressing - Urea application (60 days after sowing)',
+                    allDay: true
+                });
+                
+                // Harvest window
+                const harvestStart = new Date(sowingStart);
+                harvestStart.setDate(harvestStart.getDate() + 90);
+                const harvestEnd = new Date(sowingStart);
+                harvestEnd.setDate(harvestEnd.getDate() + 120);
+                
+                events.push({
+                    title: `🌾 Harvest Window - ${cropName}`,
+                    start: harvestStart,
+                    end: harvestEnd,
+                    className: 'event-harvest',
+                    description: 'Optimal harvest period for maximum yield',
+                    allDay: true
+                });
+                
+                return events;
+            }
+            
+            // If dates were found, parse them
+            const startDate = parseDate(sowingMatch[1], sowingMatch[2]);
+            const endDate = parseDate(sowingMatch[3], sowingMatch[4]);
+            
+            events.push({
+                title: `🌱 Sowing Window - ${cropName}`,
+                start: startDate,
+                end: endDate,
+                className: 'event-sowing',
+                description: 'Optimal sowing period based on monsoon patterns',
+                allDay: true
+            });
+            
+            // Extract monsoon onset
+            const monsoonMatch = aiResponse.match(/monsoon onset.*?(\d{1,2})\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i);
+            if (monsoonMatch) {
+                const monsoonDate = parseDate(monsoonMatch[1], monsoonMatch[2]);
+                
+                events.push({
+                    title: '🌧️ Monsoon Onset',
+                    start: monsoonDate,
+                    className: 'event-monsoon',
+                    description: 'Expected monsoon arrival date',
+                    allDay: true
+                });
+            }
+            
+            // Add irrigation events (every 7 days after sowing for 12 weeks)
+            const sowingStart = startDate;
+            for (let i = 1; i <= 12; i++) {
+                const irrigationDate = new Date(sowingStart);
+                irrigationDate.setDate(irrigationDate.getDate() + (i * 7));
+                
+                events.push({
+                    title: `💧 Irrigation Day ${i}`,
+                    start: irrigationDate,
+                    className: 'event-irrigation',
+                    description: `Scheduled irrigation - Week ${i} after sowing`,
+                    allDay: true
+                });
+            }
+            
+            // Add fertilizer application events
+            events.push({
+                title: '🧪 Basal Fertilizer',
+                start: sowingStart,
+                className: 'event-fertilizer',
+                description: 'Apply basal dose of NPK fertilizer at sowing',
+                allDay: true
+            });
+            
+            const topDress1 = new Date(sowingStart);
+            topDress1.setDate(topDress1.getDate() + 30);
+            events.push({
+                title: '🧪 Top Dressing 1',
+                start: topDress1,
+                className: 'event-fertilizer',
+                description: 'First top dressing - Urea application (30 days after sowing)',
+                allDay: true
+            });
+            
+            const topDress2 = new Date(sowingStart);
+            topDress2.setDate(topDress2.getDate() + 60);
+            events.push({
+                title: '🧪 Top Dressing 2',
+                start: topDress2,
+                className: 'event-fertilizer',
+                description: 'Second top dressing - Urea application (60 days after sowing)',
+                allDay: true
+            });
+            
+            // Add harvest window (90-120 days after sowing for most crops)
+            const harvestStart = new Date(sowingStart);
+            harvestStart.setDate(harvestStart.getDate() + 90);
+            const harvestEnd = new Date(sowingStart);
+            harvestEnd.setDate(harvestEnd.getDate() + 120);
+            
+            events.push({
+                title: `🌾 Harvest Window - ${cropName}`,
+                start: harvestStart,
+                end: harvestEnd,
+                className: 'event-harvest',
+                description: 'Optimal harvest period for maximum yield',
+                allDay: true
+            });
+            
+            return events;
+        }
+        
+        // Switch between calendar views
+        function switchCalendarView(view) {
+            currentCalendarView = view;
+            
+            // Update button states
+            document.querySelectorAll('.btn-view').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${view}-view`).classList.add('active');
+            
+            // Show/hide containers
+            document.getElementById('calendar-container').style.display = view === 'calendar' ? 'block' : 'none';
+            document.getElementById('timeline-container').style.display = view === 'timeline' ? 'block' : 'none';
+            document.getElementById('text-container').style.display = view === 'text' ? 'block' : 'none';
+        }
+        
+        // Render timeline view
+        function renderTimelineView(events) {
+            const container = document.getElementById('timeline-events');
+            container.innerHTML = '';
+            
+            if (events.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">No events to display</p>';
+                return;
+            }
+            
+            // Sort events by date
+            const sortedEvents = [...events].sort((a, b) => new Date(a.start) - new Date(b.start));
+            
+            sortedEvents.forEach(event => {
+                const eventEl = document.createElement('div');
+                eventEl.className = 'timeline-event';
+                
+                const startDate = new Date(event.start);
+                const endDate = event.end ? new Date(event.end) : null;
+                
+                let dateStr = startDate.toLocaleDateString('en-IN', { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    year: 'numeric' 
+                });
+                
+                if (endDate) {
+                    dateStr += ' - ' + endDate.toLocaleDateString('en-IN', { 
+                        day: 'numeric', 
+                        month: 'short'
+                    });
+                }
+                
+                eventEl.innerHTML = `
+                    <div class="timeline-date">${dateStr}</div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">${event.title}</div>
+                        <div class="timeline-description">${event.description || ''}</div>
+                    </div>
+                `;
+                container.appendChild(eventEl);
+            });
+        }
+        
+        // Show event details modal
+        function showEventDetails(event) {
+            const startDate = new Date(event.start);
+            const endDate = event.end ? new Date(event.end) : null;
+            
+            let dateHtml = `<p><strong>Date:</strong> ${startDate.toLocaleDateString('en-IN', { 
+                weekday: 'long',
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            })}</p>`;
+            
+            if (endDate) {
+                dateHtml += `<p><strong>End Date:</strong> ${endDate.toLocaleDateString('en-IN', { 
+                    weekday: 'long',
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                })}</p>`;
+            }
+            
+            document.getElementById('modal-title').textContent = event.title;
+            document.getElementById('modal-body').innerHTML = `
+                ${dateHtml}
+                <p><strong>Description:</strong> ${event.extendedProps.description || 'No description available'}</p>
+            `;
+            document.getElementById('event-modal').classList.add('show');
+        }
+        
+        // Close event modal
+        function closeEventModal() {
+            document.getElementById('event-modal').classList.remove('show');
+        }
+        
         // Auto-populate other tabs when data is available
         function autoPopulateTabs() {
             if (!farmerData.locationId) return;
@@ -965,7 +1611,7 @@
             }
         });
 
-        // Tab 2: Sowing Calendar
+        // Tab 2: Sowing Calendar (UPDATED WITH VISUAL CALENDAR)
         document.getElementById('calendarForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             showLoading('calendar');
@@ -995,12 +1641,41 @@
 
                 if (data.success) {
                     currentCalendarId = data.calendar.calendarId;
-                    showResults('calendar', data.calendar.recommendations);
+                    
+                    // Show text view
+                    document.getElementById('content-calendar').textContent = data.calendar.recommendations;
+                    
+                    // Parse events from AI response
+                    calendarEvents = parseCalendarEvents(
+                        data.calendar.recommendations, 
+                        formData.cropName
+                    );
+                    
+                    console.log('Parsed calendar events:', calendarEvents);
+                    
+                    // Initialize or update calendar
+                    if (!calendar) {
+                        initializeCalendar();
+                    } else {
+                        calendar.removeAllEvents();
+                        calendar.addEventSource(calendarEvents);
+                    }
+                    
+                    // Render timeline view
+                    renderTimelineView(calendarEvents);
+                    
+                    // Show results
+                    document.getElementById('results-calendar').classList.add('show');
+                    
+                    // Default to calendar view
+                    switchCalendarView('calendar');
+                    
                 } else {
                     throw new Error(data.error || 'Failed to generate calendar');
                 }
             } catch (error) {
                 showError('calendar', error.message);
+                console.error('Calendar error:', error);
             } finally {
                 hideLoading('calendar');
             }
