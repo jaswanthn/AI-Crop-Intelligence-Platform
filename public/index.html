@@ -1025,8 +1025,35 @@
                 const data = await response.json();
                 if (data.success) {
                     currentCalendarId = data.calendar.calendarId;
+                    
+                    // Show text view
                     document.getElementById('content-calendar').textContent = data.calendar.recommendations;
+                    
+                    // Parse events from AI response
+                    calendarEvents = parseCalendarEvents(
+                        data.calendar.recommendations, 
+                        cropName
+                    );
+                    
+                    console.log('Auto-generated calendar events:', calendarEvents);
+                    
+                    // Initialize or update calendar
+                    if (!calendar) {
+                        initializeCalendar();
+                    } else {
+                        calendar.removeAllEvents();
+                        calendar.addEventSource(calendarEvents);
+                    }
+                    
+                    // Render timeline view
+                    renderTimelineView(calendarEvents);
+                    
+                    // Show results
                     document.getElementById('results-calendar').classList.add('show');
+                    
+                    // Default to calendar view
+                    switchCalendarView('calendar');
+                    
                     if (document.getElementById('calendar-autofill')) {
                         document.getElementById('calendar-autofill').style.display = 'block';
                     }
@@ -1491,29 +1518,32 @@
         function autoPopulateTabs() {
             if (!farmerData.locationId) return;
             
+            // Use selected crop if available, otherwise use first recommended crop
+            const cropToUse = farmerData.selectedCrop || (farmerData.recommendedCrops.length > 0 ? farmerData.recommendedCrops[0] : '');
+            
             // Auto-populate Sowing Calendar
-            if (farmerData.recommendedCrops.length > 0) {
-                document.getElementById('calendarCrop').value = farmerData.recommendedCrops[0];
+            if (cropToUse) {
+                document.getElementById('calendarCrop').value = cropToUse;
             }
             document.getElementById('calendarLocation').value = farmerData.locationId;
             
             // Auto-populate Irrigation Schedule
-            if (farmerData.recommendedCrops.length > 0) {
-                document.getElementById('irrigationCrop').value = farmerData.recommendedCrops[0];
+            if (cropToUse) {
+                document.getElementById('irrigationCrop').value = cropToUse;
             }
             document.getElementById('irrigationLocation').value = farmerData.locationId;
             
             // Auto-populate Fertilizer Calculator
-            if (farmerData.recommendedCrops.length > 0) {
-                document.getElementById('nutrientsCrop').value = farmerData.recommendedCrops[0];
+            if (cropToUse) {
+                document.getElementById('nutrientsCrop').value = cropToUse;
             }
             if (farmerData.phLevel) {
                 document.getElementById('nutrientsPh').value = farmerData.phLevel;
             }
             
             // Auto-populate Risk Assessment
-            if (farmerData.recommendedCrops.length > 0) {
-                document.getElementById('risksCrop').value = farmerData.recommendedCrops[0];
+            if (cropToUse) {
+                document.getElementById('risksCrop').value = cropToUse;
             }
             document.getElementById('risksLocation').value = farmerData.locationId;
         }
