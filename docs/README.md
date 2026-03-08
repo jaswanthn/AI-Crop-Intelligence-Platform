@@ -10,17 +10,13 @@ Complete documentation for the AI Crop Intelligence Platform.
 
 ### Features & Capabilities
 - **[FEATURES.md](FEATURES.md)** - Complete feature list with technical details
-- **[NEW-FEATURES.md](NEW-FEATURES.md)** - Latest features (Sowing, Irrigation, Fertilizer, Risk)
 - **[ENHANCED-WORKFLOW.md](ENHANCED-WORKFLOW.md)** - Intelligent workflow documentation
 
 ### Deployment Guides
 - **[EC2-DEPLOY.md](EC2-DEPLOY.md)** - AWS EC2 deployment (Production)
 - **[VERCEL-DEPLOY.md](VERCEL-DEPLOY.md)** - Vercel serverless deployment
-- **[DEPLOY.md](DEPLOY.md)** - General deployment overview
-- **[DEPLOY-NEW-FEATURES.md](DEPLOY-NEW-FEATURES.md)** - Deploying new features
 
 ### Development
-- **[IMPLEMENTATION-COMPLETE.md](IMPLEMENTATION-COMPLETE.md)** - Implementation summary
 - **[../scripts/README.md](../scripts/README.md)** - Data upload scripts
 - **[../scripts/QUERY-README.md](../scripts/QUERY-README.md)** - Knowledge Base query testing
 
@@ -62,13 +58,9 @@ docs/
 ├── README.md                      # This file (documentation index)
 ├── FEATURES.md                    # Complete feature list
 ├── QUICK-START.md                 # Getting started guide
-├── NEW-FEATURES.md                # Latest features
 ├── ENHANCED-WORKFLOW.md           # Workflow documentation
 ├── EC2-DEPLOY.md                  # AWS EC2 deployment
-├── VERCEL-DEPLOY.md               # Vercel deployment
-├── DEPLOY.md                      # General deployment
-├── DEPLOY-NEW-FEATURES.md         # Feature deployment
-└── IMPLEMENTATION-COMPLETE.md     # Implementation summary
+└── VERCEL-DEPLOY.md               # Vercel deployment
 
 ../scripts/
 ├── README.md                      # Data upload guide

@@ -271,10 +271,9 @@ Use the test data in [docs/QUICK-START.md](docs/QUICK-START.md):
 | [docs/README.md](docs/README.md) | Documentation index and navigation |
 | [docs/FEATURES.md](docs/FEATURES.md) | Complete feature list with details |
 | [docs/QUICK-START.md](docs/QUICK-START.md) | Testing guide with sample data |
+| [docs/ENHANCED-WORKFLOW.md](docs/ENHANCED-WORKFLOW.md) | Workflow details |
 | [docs/EC2-DEPLOY.md](docs/EC2-DEPLOY.md) | AWS EC2 deployment guide |
 | [docs/VERCEL-DEPLOY.md](docs/VERCEL-DEPLOY.md) | Vercel deployment guide |
-| [docs/NEW-FEATURES.md](docs/NEW-FEATURES.md) | Latest features documentation |
-| [docs/ENHANCED-WORKFLOW.md](docs/ENHANCED-WORKFLOW.md) | Workflow details |
 | [scripts/README.md](scripts/README.md) | Data upload instructions |
 
 **👉 See [docs/README.md](docs/README.md) for complete documentation index**
