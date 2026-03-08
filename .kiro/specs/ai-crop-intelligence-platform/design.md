@@ -6,12 +6,23 @@ The AI-Powered Crop Intelligence Platform is a mobile-responsive web application
 
 The platform addresses the capital constraints of rural Indian farmers by eliminating the need for expensive IoT sensors while still providing data-driven insights. The architecture is designed with future extensibility in mind, allowing seamless integration of IoT devices (ESP32 microcontrollers) to replace manual inputs without requiring major refactoring.
 
+**New Features (Requirements 13-15):**
+
+The platform has been extended with three major feature sets:
+
+1. **Sowing & Irrigation Calendars (Requirement 13):** Provides precision timing for planting and daily water management. The system generates crop-specific sowing calendars based on regional monsoon patterns and climate data, identifies optimal sowing windows, and sends alerts 7 days before favorable planting conditions. It also creates day-by-day irrigation schedules optimized for each crop growth stage, with calendar export functionality (iCal and PDF) for offline reference.
+
+2. **Nutrient Management & Fertilizer Dose Calculator (Requirement 14):** Enables precise fertilizer application based on soil test results. The system calculates exact doses for NPK, Urea, DAP, and micronutrients while preventing Urea over-application through agronomic safety limits. It provides split-dose recommendations (basal + top-dressing) with exact timing, cost estimates based on current market prices, and organic fertilizer alternatives with equivalent nutrient values.
+
+3. **Risk Mitigation & Harvest Optimization (Requirement 15):** Delivers early warnings and optimal harvest timing. The system predicts pest and disease outbreak probabilities using weather patterns and crop stage data, sends alerts when risks exceed 60%, identifies specific pests (bollworm, aphids) with preventive measures and treatments, generates weather-based risk alerts (frost, heatwave, heavy rain) with protective actions, and recommends optimal harvest timing considering both yield maximization and market price optimization.
+
 Key design principles:
 - Mobile-first responsive design for low-end smartphones
 - Bilingual support (English and Hindi) throughout the interface
 - Offline-capable data entry with sync-on-connect
 - Modular data ingestion supporting multiple input sources
-- Scalable AWS infrastructure for compute-intensive AI operations
+- Scalable AWS infrastructure with Bedrock Knowledge Base for AI operations
+- Alert scheduling and notification system for timely farmer guidance
 
 ## Architecture
 
@@ -31,15 +42,24 @@ graph TB
         FarmerInput[Farmer Input Module]
         AIEngine[AI Intelligence Engine]
         Cache[Cache Manager]
+        CalendarExport[Calendar Export Service]
+        AlertScheduler[Alert Scheduling Service]
+        ExternalData[External Data Integration]
     end
     
     subgraph "Data Layer"
         DB[(Farmer Database)]
         GovCache[(Regional Data Cache)]
+        AlertDB[(Alerts Database)]
+        CalendarDB[(Calendars Database)]
     end
     
     subgraph "External Services"
         GovAPI[Government APIs]
+        Bedrock[AWS Bedrock Knowledge Base]
+        WeatherAPI[Weather Forecast API]
+        MarketAPI[Market Price API]
+        SNS[AWS SNS - SMS Alerts]
     end
     
     UI --> API
@@ -48,6 +68,8 @@ graph TB
     API --> DataIngestion
     API --> FarmerInput
     API --> AIEngine
+    API --> CalendarExport
+    API --> AlertScheduler
     
     DataIngestion --> GovAPI
     DataIngestion --> Cache
@@ -56,11 +78,24 @@ graph TB
     FarmerInput --> DB
     AIEngine --> DB
     AIEngine --> GovCache
+    AIEngine --> Bedrock
+    AIEngine --> ExternalData
+    
+    ExternalData --> WeatherAPI
+    ExternalData --> MarketAPI
+    ExternalData --> Cache
+    
+    CalendarExport --> CalendarDB
+    AlertScheduler --> AlertDB
+    AlertScheduler --> SNS
     
     style UI fill:#e1f5ff
     style AIEngine fill:#fff4e1
+    style Bedrock fill:#fff4e1
     style DB fill:#f0f0f0
     style GovAPI fill:#e8f5e9
+    style WeatherAPI fill:#e8f5e9
+    style MarketAPI fill:#e8f5e9
 ```
 
 ### Component Interaction Flow
@@ -101,6 +136,83 @@ sequenceDiagram
     AI-->>API: Return recommendations
     API-->>UI: Display recommendations
     UI-->>F: Show results in selected language
+```
+
+### New Features Interaction Flow (Requirements 13-15)
+
+```mermaid
+sequenceDiagram
+    participant F as Farmer
+    participant UI as Web UI
+    participant API as API Gateway
+    participant AI as AI Engine
+    participant Bedrock as AWS Bedrock KB
+    participant Ext as External Data Service
+    participant Alert as Alert Scheduler
+    participant DB as Database
+    
+    Note over F,DB: Sowing Calendar Generation (Req 13)
+    F->>UI: Request sowing calendar for crop
+    UI->>API: POST /api/v1/calendar/sowing
+    API->>AI: Generate sowing calendar
+    AI->>Bedrock: Query monsoon patterns & climate data
+    Bedrock-->>AI: Return climate insights
+    AI->>AI: Calculate optimal sowing windows
+    AI->>DB: Store calendar
+    AI-->>API: Return sowing calendar
+    API-->>UI: Display calendar with export options
+    
+    F->>UI: Download calendar as PDF
+    UI->>API: GET /api/v1/calendar/export?format=pdf
+    API->>DB: Retrieve calendar
+    API->>API: Generate PDF
+    API-->>UI: Return PDF file
+    
+    Note over Alert,F: Alert Scheduling (Req 13.10)
+    Alert->>DB: Check calendars for upcoming sowing windows
+    DB-->>Alert: Return calendars within 7 days
+    Alert->>Alert: Generate sowing alerts
+    Alert->>DB: Store alerts
+    Alert->>F: Send SMS notification
+    
+    Note over F,DB: Nutrient Management (Req 14)
+    F->>UI: Enter soil test results
+    UI->>API: POST /api/v1/nutrient-management/calculate
+    API->>AI: Calculate fertilizer doses
+    AI->>Bedrock: Query fertilizer recommendations
+    Bedrock-->>AI: Return NPK/Urea/DAP guidelines
+    AI->>AI: Apply Urea safety limits
+    AI->>AI: Generate split-dose schedule
+    AI->>Ext: Fetch current fertilizer prices
+    Ext-->>AI: Return market prices
+    AI->>AI: Calculate cost estimates
+    AI->>DB: Store nutrient plan
+    AI-->>API: Return complete plan with costs
+    API-->>UI: Display fertilizer recommendations
+    
+    Note over F,DB: Risk Assessment (Req 15)
+    F->>UI: Request risk assessment
+    UI->>API: POST /api/v1/risk-assessment
+    API->>Ext: Fetch weather forecast
+    Ext-->>API: Return 7-day forecast
+    API->>Ext: Fetch market price trends
+    Ext-->>API: Return price data
+    API->>AI: Assess risks
+    AI->>Bedrock: Query pest/disease patterns
+    Bedrock-->>AI: Return risk factors
+    AI->>AI: Calculate outbreak probabilities
+    AI->>AI: Optimize harvest timing
+    AI->>AI: Prioritize alerts by severity
+    AI->>DB: Store risk assessment
+    AI-->>API: Return prioritized alerts
+    API-->>UI: Display risk dashboard
+    
+    Note over Alert,F: Risk Alert Triggering (Req 15.3-15.4)
+    Alert->>DB: Check risk probabilities
+    DB-->>Alert: Return risks > 60%
+    Alert->>Alert: Generate high-priority alerts
+    Alert->>DB: Store alerts
+    Alert->>F: Send urgent SMS notification
 ```
 
 ## Components and Interfaces
@@ -212,7 +324,7 @@ interface FarmerInputModule {
 
 ### 3. AI Intelligence Engine
 
-**Responsibility:** Analyze combined data to generate crop recommendations, fertilizer plans, irrigation schedules, and yield predictions.
+**Responsibility:** Analyze combined data to generate crop recommendations, fertilizer plans, irrigation schedules, yield predictions, sowing/irrigation calendars, nutrient management plans, and risk assessments.
 
 **Interfaces:**
 
@@ -266,6 +378,217 @@ interface YieldFactor {
   descriptionHindi: string;
 }
 
+// New interfaces for Requirements 13-15
+
+interface SowingCalendar {
+  cropName: string;
+  cropNameHindi: string;
+  sowingWindows: SowingWindow[];
+  monsoonPatternData: MonsoonPattern;
+  regionalClimateFactors: string[];
+  regionalClimateFactorsHindi: string[];
+}
+
+interface SowingWindow {
+  startDate: Date;
+  endDate: Date;
+  optimalityScore: number; // 0-100
+  climateConditions: string;
+  climateConditionsHindi: string;
+}
+
+interface MonsoonPattern {
+  onsetDate: Date;
+  withdrawalDate: Date;
+  expectedRainfallMm: number;
+  reliability: number; // 0-1
+}
+
+interface DailyIrrigationSchedule {
+  cropName: string;
+  cropNameHindi: string;
+  dailySchedule: IrrigationEvent[];
+  totalSeasonalWaterLitersPerHectare: number;
+  growthStageOptimizations: GrowthStageWaterRequirement[];
+}
+
+interface IrrigationEvent {
+  date: Date;
+  waterVolumeLitersPerHectare: number;
+  growthStage: string;
+  growthStageHindi: string;
+  notes: string;
+  notesHindi: string;
+}
+
+interface GrowthStageWaterRequirement {
+  stage: string;
+  stageHindi: string;
+  durationDays: number;
+  dailyWaterRequirementLitersPerHectare: number;
+  criticalityLevel: "low" | "medium" | "high";
+}
+
+interface SoilTestResults {
+  testDate: Date;
+  nitrogenPpm: number;
+  phosphorusPpm: number;
+  potassiumPpm: number;
+  organicCarbonPercent: number;
+  phLevel: number;
+  electricalConductivity: number;
+  sulfurPpm: number;
+  zincPpm: number;
+  ironPpm: number;
+}
+
+interface NutrientManagementPlan {
+  cropName: string;
+  cropNameHindi: string;
+  soilTestResults: SoilTestResults;
+  fertilizerDoses: FertilizerDose[];
+  organicAlternatives: OrganicAlternative[];
+  costEstimate: CostEstimate;
+  warnings: NutrientWarning[];
+}
+
+interface FertilizerDose {
+  fertilizerType: "NPK" | "Urea" | "DAP" | "Potash" | "Zinc" | "Other";
+  fertilizerName: string;
+  fertilizerNameHindi: string;
+  splitDoses: SplitDoseApplication[];
+  totalQuantityKgPerHectare: number;
+  nutrientContent: {
+    nitrogenPercent?: number;
+    phosphorusPercent?: number;
+    potassiumPercent?: number;
+  };
+}
+
+interface SplitDoseApplication {
+  applicationType: "basal" | "top-dressing";
+  daysAfterSowing: number;
+  quantityKgPerHectare: number;
+  applicationMethod: string;
+  applicationMethodHindi: string;
+}
+
+interface OrganicAlternative {
+  organicFertilizerName: string;
+  organicFertilizerNameHindi: string;
+  equivalentNutrientValue: string;
+  applicationRateKgPerHectare: number;
+  expectedOutcome: string;
+  expectedOutcomeHindi: string;
+}
+
+interface CostEstimate {
+  totalCostINR: number;
+  breakdown: CostBreakdown[];
+  lastUpdated: Date;
+}
+
+interface CostBreakdown {
+  item: string;
+  itemHindi: string;
+  quantityKg: number;
+  pricePerKgINR: number;
+  totalINR: number;
+}
+
+interface NutrientWarning {
+  severity: "low" | "medium" | "high";
+  warningType: "over-application" | "deficiency" | "toxicity";
+  nutrient: string;
+  message: string;
+  messageHindi: string;
+  recommendation: string;
+  recommendationHindi: string;
+}
+
+interface RiskAssessment {
+  cropName: string;
+  cropNameHindi: string;
+  currentGrowthStage: string;
+  currentGrowthStageHindi: string;
+  pestRisks: PestRisk[];
+  diseaseRisks: DiseaseRisk[];
+  weatherRisks: WeatherRisk[];
+  harvestOptimization: HarvestRecommendation;
+  prioritizedAlerts: RiskAlert[];
+}
+
+interface PestRisk {
+  pestType: string;
+  pestTypeHindi: string;
+  outbreakProbability: number; // 0-100
+  affectedGrowthStages: string[];
+  preventiveMeasures: string[];
+  preventiveMeasuresHindi: string[];
+  treatmentRecommendations: string[];
+  treatmentRecommendationsHindi: string[];
+}
+
+interface DiseaseRisk {
+  diseaseType: string;
+  diseaseTypeHindi: string;
+  outbreakProbability: number; // 0-100
+  affectedGrowthStages: string[];
+  preventiveMeasures: string[];
+  preventiveMeasuresHindi: string[];
+  treatmentRecommendations: string[];
+  treatmentRecommendationsHindi: string[];
+}
+
+interface WeatherRisk {
+  riskType: "frost" | "heatwave" | "heavy_rain" | "drought" | "hail";
+  riskTypeHindi: string;
+  probability: number; // 0-100
+  expectedDate: Date;
+  duration: string;
+  protectiveActions: string[];
+  protectiveActionsHindi: string[];
+  potentialDamage: string;
+  potentialDamageHindi: string;
+}
+
+interface HarvestRecommendation {
+  optimalHarvestDate: Date;
+  harvestWindow: {
+    startDate: Date;
+    endDate: Date;
+  };
+  yieldMaximizationFactors: string[];
+  yieldMaximizationFactorsHindi: string[];
+  marketPriceOptimization: MarketPriceAnalysis;
+  confidence: number; // 0-1
+}
+
+interface MarketPriceAnalysis {
+  currentPriceINRPerQuintal: number;
+  projectedPriceINRPerQuintal: number;
+  pricetrend: "increasing" | "decreasing" | "stable";
+  optimalSellingWindow: {
+    startDate: Date;
+    endDate: Date;
+  };
+  marketDemandLevel: "low" | "medium" | "high";
+}
+
+interface RiskAlert {
+  alertId: string;
+  alertType: "pest" | "disease" | "weather" | "harvest";
+  severity: "low" | "medium" | "high" | "critical";
+  timeSensitivity: number; // days until action needed
+  title: string;
+  titleHindi: string;
+  message: string;
+  messageHindi: string;
+  actionRequired: string[];
+  actionRequiredHindi: string[];
+  createdAt: Date;
+}
+
 interface AIEngine {
   analyzeCropSuitability(
     regional: RegionalData,
@@ -289,6 +612,37 @@ interface AIEngine {
     regional: RegionalData,
     manual: FarmerInput
   ): Promise<YieldEstimation>;
+  
+  // New methods for Requirements 13-15
+  
+  generateSowingCalendar(
+    crop: string,
+    regional: RegionalData
+  ): Promise<SowingCalendar>;
+  
+  generateDailyIrrigationSchedule(
+    crop: string,
+    growthStageData: string,
+    regional: RegionalData,
+    manual: FarmerInput
+  ): Promise<DailyIrrigationSchedule>;
+  
+  generateSowingAlert(
+    calendar: SowingCalendar,
+    currentDate: Date
+  ): Promise<RiskAlert | null>;
+  
+  calculateNutrientManagementPlan(
+    crop: string,
+    soilTestResults: SoilTestResults
+  ): Promise<NutrientManagementPlan>;
+  
+  assessRisks(
+    crop: string,
+    growthStage: string,
+    weatherData: any,
+    marketData: any
+  ): Promise<RiskAssessment>;
 }
 ```
 
@@ -321,10 +675,40 @@ The AI Engine uses a multi-model approach:
    - Outputs point estimate with confidence interval
 
 **Implementation Notes:**
-- Deploy models on AWS SageMaker for scalable inference
-- Use AWS Lambda for lightweight model serving
+- Use AWS Bedrock Knowledge Base (ID: ZQS6EKVSG7) with Amazon Nova Lite model for AI inference
+- Deploy on AWS EC2 for consistent availability
 - Cache model predictions for identical input combinations (1 hour TTL)
 - Implement model versioning for A/B testing and rollback capability
+
+**New Feature Implementation (Requirements 13-15):**
+
+5. **Sowing Calendar Generation:**
+   - Query Knowledge Base with crop type and regional climate data
+   - Extract monsoon onset/withdrawal dates from regional data
+   - Calculate optimal sowing windows based on climate patterns
+   - Generate alerts 7 days before sowing window opens
+
+6. **Daily Irrigation Scheduling:**
+   - Query Knowledge Base with crop growth stage requirements
+   - Calculate day-by-day water needs based on evapotranspiration
+   - Optimize schedule for each growth stage (germination, vegetative, flowering, maturity)
+   - Integrate with existing water availability data
+
+7. **Nutrient Management Calculator:**
+   - Accept soil test results as structured input
+   - Calculate NPK, Urea, DAP, and micronutrient requirements
+   - Implement Urea safety limits (max 200 kg/hectare for most crops)
+   - Generate split-dose schedules (basal + top-dressing)
+   - Query market price APIs for cost estimation
+   - Provide organic alternatives (FYM, compost, vermicompost)
+
+8. **Risk Assessment Engine:**
+   - Integrate weather forecast APIs for 7-14 day predictions
+   - Use weather patterns + crop stage to predict pest/disease probability
+   - Trigger alerts when probability exceeds 60%
+   - Identify specific pests (bollworm, aphids, stem borer, etc.)
+   - Analyze market price trends for harvest timing optimization
+   - Prioritize alerts by severity and time sensitivity
 
 ### 4. Language Service
 
@@ -353,7 +737,95 @@ interface TranslationDictionary {
 - Preload all translations on app initialization to avoid latency
 - Store user language preference in DynamoDB user profile
 
-### 5. API Gateway
+### 6. Calendar Export Service
+
+**Responsibility:** Generate downloadable calendar files in multiple formats.
+
+**Interfaces:**
+
+```typescript
+interface CalendarExportService {
+  exportToICal(calendar: SowingCalendar | DailyIrrigationSchedule): Promise<string>;
+  exportToPDF(calendar: SowingCalendar | DailyIrrigationSchedule, language: "en" | "hi"): Promise<Buffer>;
+  generateDownloadUrl(calendarId: string, format: "ical" | "pdf"): Promise<string>;
+}
+```
+
+**Implementation Notes:**
+- Use `ical-generator` library for iCal format generation
+- Use `puppeteer` or `pdfkit` for PDF generation
+- Store generated files temporarily in S3 with 24-hour expiration
+- Generate pre-signed URLs for secure downloads
+
+### 7. Alert Scheduling Service
+
+**Responsibility:** Monitor calendars and risk assessments to trigger timely alerts.
+
+**Interfaces:**
+
+```typescript
+interface AlertSchedulingService {
+  scheduleAlert(alert: RiskAlert, deliveryDate: Date): Promise<string>;
+  checkSowingWindowAlerts(): Promise<RiskAlert[]>;
+  checkRiskThresholdAlerts(): Promise<RiskAlert[]>;
+  sendAlert(alertId: string, farmerId: string): Promise<void>;
+  markAlertAsRead(alertId: string): Promise<void>;
+}
+```
+
+**Implementation Notes:**
+- Use AWS EventBridge for scheduled alert checks (run daily at 6 AM IST)
+- Use AWS SNS for SMS notifications to farmers
+- Store alert delivery status in DynamoDB
+- Implement retry logic for failed deliveries
+
+### 8. External Data Integration Service
+
+**Responsibility:** Fetch weather forecasts and market price data from external APIs.
+
+**Interfaces:**
+
+```typescript
+interface WeatherForecast {
+  locationId: string;
+  forecastDate: Date;
+  temperature: {
+    minCelsius: number;
+    maxCelsius: number;
+  };
+  rainfall: {
+    probabilityPercent: number;
+    expectedMm: number;
+  };
+  humidity: number;
+  windSpeedKmh: number;
+  conditions: string;
+}
+
+interface MarketPrice {
+  cropName: string;
+  priceDate: Date;
+  priceINRPerQuintal: number;
+  marketName: string;
+  trend: "increasing" | "decreasing" | "stable";
+}
+
+interface ExternalDataService {
+  fetchWeatherForecast(locationId: string, days: number): Promise<WeatherForecast[]>;
+  fetchMarketPrices(cropName: string): Promise<MarketPrice[]>;
+  getCachedWeatherForecast(locationId: string): Promise<WeatherForecast[] | null>;
+  getCachedMarketPrices(cropName: string): Promise<MarketPrice[] | null>;
+}
+```
+
+**Implementation Notes:**
+- Integrate with India Meteorological Department (IMD) API for weather data
+- Integrate with AGMARKNET API for market prices
+- Cache weather forecasts for 6 hours in ElastiCache
+- Cache market prices for 24 hours in ElastiCache
+- Implement fallback to historical averages if APIs are unavailable
+
+### 9. API Gateway
 
 **Responsibility:** Route requests, handle authentication, and enforce rate limiting.
 
@@ -370,6 +842,44 @@ GET    /api/v1/recommendations/:cropName/fertilizer
 GET    /api/v1/recommendations/:cropName/irrigation
 GET    /api/v1/recommendations/:cropName/yield
 PUT    /api/v1/user/language
+
+# New endpoints for Requirements 13-15
+
+# Sowing & Irrigation Calendars (Requirement 13)
+POST   /api/v1/calendar/sowing
+       Body: { cropName, locationId, language }
+       Returns: SowingCalendar with optimal sowing windows
+
+POST   /api/v1/calendar/irrigation
+       Body: { cropName, growthStage, locationId, farmerInputId, language }
+       Returns: DailyIrrigationSchedule with day-by-day water requirements
+
+GET    /api/v1/calendar/export/:calendarId
+       Query: { format: "ical" | "pdf" }
+       Returns: Calendar file for download
+
+GET    /api/v1/alerts/sowing
+       Returns: Active sowing alerts for authenticated farmer
+
+# Nutrient Management (Requirement 14)
+POST   /api/v1/nutrient-management/calculate
+       Body: { cropName, soilTestResults, language }
+       Returns: NutrientManagementPlan with fertilizer doses and costs
+
+GET    /api/v1/nutrient-management/organic-alternatives/:cropName
+       Returns: List of organic fertilizer alternatives
+
+# Risk Mitigation (Requirement 15)
+POST   /api/v1/risk-assessment
+       Body: { cropName, growthStage, locationId, language }
+       Returns: RiskAssessment with pest/disease/weather risks
+
+GET    /api/v1/alerts/risk
+       Returns: Prioritized risk alerts for authenticated farmer
+
+POST   /api/v1/harvest/optimize
+       Body: { cropName, maturityDate, locationId, language }
+       Returns: HarvestRecommendation with optimal timing
 ```
 
 **Implementation Notes:**
@@ -421,6 +931,107 @@ interface FarmerInputRecord {
 // Key: `rec:${hash(regionalData + farmerInput)}`
 // Value: JSON-serialized recommendations
 // TTL: 1 hour (3600 seconds)
+```
+
+**New Tables for Requirements 13-15:**
+
+**SowingCalendars Table:**
+```typescript
+interface SowingCalendarRecord {
+  calendarId: string; // Partition key
+  farmerId: string; // GSI partition key
+  cropName: string;
+  locationId: string;
+  sowingWindows: SowingWindow[];
+  monsoonData: MonsoonPattern;
+  createdAt: Date;
+  expiresAt: Date; // TTL for next season
+}
+```
+
+**IrrigationSchedules Table:**
+```typescript
+interface IrrigationScheduleRecord {
+  scheduleId: string; // Partition key
+  farmerId: string; // GSI partition key
+  cropName: string;
+  dailyEvents: IrrigationEvent[];
+  totalSeasonalWater: number;
+  createdAt: Date;
+  seasonEndDate: Date; // TTL
+}
+```
+
+**SoilTestResults Table:**
+```typescript
+interface SoilTestResultRecord {
+  testId: string; // Partition key
+  farmerId: string; // GSI partition key
+  locationId: string;
+  testDate: Date;
+  nitrogenPpm: number;
+  phosphorusPpm: number;
+  potassiumPpm: number;
+  organicCarbonPercent: number;
+  phLevel: number;
+  electricalConductivity: number;
+  sulfurPpm: number;
+  zincPpm: number;
+  ironPpm: number;
+  labName: string;
+  createdAt: Date;
+}
+```
+
+**NutrientManagementPlans Table:**
+```typescript
+interface NutrientManagementPlanRecord {
+  planId: string; // Partition key
+  farmerId: string; // GSI partition key
+  cropName: string;
+  soilTestId: string; // Reference to SoilTestResults
+  fertilizerDoses: FertilizerDose[];
+  organicAlternatives: OrganicAlternative[];
+  totalCostINR: number;
+  warnings: NutrientWarning[];
+  createdAt: Date;
+  seasonEndDate: Date; // TTL
+}
+```
+
+**RiskAlerts Table:**
+```typescript
+interface RiskAlertRecord {
+  alertId: string; // Partition key
+  farmerId: string; // GSI partition key
+  alertType: "pest" | "disease" | "weather" | "harvest" | "sowing";
+  severity: "low" | "medium" | "high" | "critical";
+  timeSensitivity: number; // days
+  cropName: string;
+  title: string;
+  titleHindi: string;
+  message: string;
+  messageHindi: string;
+  actionRequired: string[];
+  actionRequiredHindi: string[];
+  isRead: boolean;
+  createdAt: Date; // GSI sort key
+  expiresAt: Date; // TTL
+}
+```
+
+**MarketPriceCache (ElastiCache Redis):**
+```typescript
+// Key: `market:${cropName}:${date}`
+// Value: JSON-serialized market price data
+// TTL: 24 hours (86400 seconds)
+```
+
+**WeatherForecastCache (ElastiCache Redis):**
+```typescript
+// Key: `weather:${locationId}:${date}`
+// Value: JSON-serialized weather forecast data
+// TTL: 6 hours (21600 seconds)
 ```
 
 ### Data Flow
@@ -609,6 +1220,88 @@ interface FarmerInputRecord {
 *For any* system state where IoT endpoints are available, the Platform should continue to accept and process manual farmer inputs as an alternative data source.
 **Validates: Requirements 12.5**
 
+### Sowing & Irrigation Calendar Properties (Requirement 13)
+
+**Property 35: Sowing Calendar Generation**
+*For any* valid crop type and regional data combination, the AI Engine should generate a sowing calendar containing optimal sowing windows with start and end dates.
+**Validates: Requirements 13.1, 13.3**
+
+**Property 36: Monsoon Pattern Integration**
+*For any* two regional data sets that differ in monsoon pattern data, the AI Engine should generate different sowing calendars that reflect the monsoon timing differences.
+**Validates: Requirements 13.2**
+
+**Property 37: Favorable Weather Alert Generation**
+*For any* sowing calendar where weather forecast indicates favorable conditions within the sowing window, the AI Engine should generate alerts for optimal sowing timing.
+**Validates: Requirements 13.4**
+
+**Property 38: Daily Irrigation Schedule Structure**
+*For any* crop type and growth stage data, the AI Engine should generate a day-by-day irrigation schedule specifying irrigation dates and water volumes in liters per hectare.
+**Validates: Requirements 13.5, 13.7**
+
+**Property 39: Growth Stage Water Optimization**
+*For any* two growth stages with different water requirements, the irrigation schedule should specify different water application volumes optimized for each stage.
+**Validates: Requirements 13.6**
+
+**Property 40: Calendar Export Functionality**
+*For any* generated sowing or irrigation calendar, the Platform should provide export functionality in standard calendar formats (iCal) and PDF download for offline reference.
+**Validates: Requirements 13.8, 13.9**
+
+**Property 41: Seven-Day Sowing Alert**
+*For any* sowing calendar where a sowing window start date is within 7 days of the current date, the Platform should send an alert to the farmer.
+**Validates: Requirements 13.10**
+
+### Nutrient Management Properties (Requirement 14)
+
+**Property 42: Complete Fertilizer Dose Calculation**
+*For any* soil test results, the AI Engine should calculate precise fertilizer doses for all required components including NPK, Urea, DAP, and other necessary fertilizers.
+**Validates: Requirements 14.1, 14.2, 14.3, 14.4**
+
+**Property 43: Urea Over-Application Prevention**
+*For any* soil test results and crop type, when calculating Urea doses, the AI Engine should limit doses to agronomically safe levels (not exceeding crop-specific maximum thresholds).
+**Validates: Requirements 14.5**
+
+**Property 44: Complete Split-Dose Recommendation Structure**
+*For any* generated fertilizer recommendation, the plan should include split-dose recommendations with basal application and top-dressing applications, specifying exact timing in days after sowing and quantities in kilograms per hectare for each application.
+**Validates: Requirements 14.6, 14.7, 14.8, 14.9**
+
+**Property 45: Cost Estimation Inclusion**
+*For any* generated fertilizer recommendation, the Platform should display cost estimates based on current market prices with breakdown by fertilizer type.
+**Validates: Requirements 14.10**
+
+**Property 46: Organic Alternative Provision**
+*For any* generated fertilizer recommendation, the AI Engine should provide organic fertilizer alternatives with equivalent nutrient values, specifying application rates and expected outcomes.
+**Validates: Requirements 14.11, 14.12**
+
+**Property 47: Urea Risk Warning**
+*For any* soil test results that indicate excessive Urea application risk (high existing nitrogen levels), the AI Engine should display warnings about potential soil health damage.
+**Validates: Requirements 14.13**
+
+### Risk Mitigation Properties (Requirement 15)
+
+**Property 48: Pest and Disease Outbreak Prediction**
+*For any* combination of weather pattern data and crop stage information, the AI Engine should predict both pest outbreak probability and disease outbreak probability as numerical values between 0 and 100.
+**Validates: Requirements 15.1, 15.2**
+
+**Property 49: Outbreak Alert Triggering**
+*For any* pest or disease outbreak probability that exceeds 60 percent, the Platform should send early warning alerts to the farmer.
+**Validates: Requirements 15.3, 15.4**
+
+**Property 50: Specific Pest Identification and Complete Alert Content**
+*For any* generated pest alert, the alert should identify specific pest types (such as bollworm, aphids, etc.) and include both preventive measures and treatment recommendations in the alert message.
+**Validates: Requirements 15.5, 15.6, 15.7**
+
+**Property 51: Harvest Timing Optimization**
+*For any* crop maturity data and market price trends, the AI Engine should recommend optimal harvest timing that considers both yield maximization factors and market price optimization factors.
+**Validates: Requirements 15.8, 15.9, 15.10**
+
+**Property 52: Weather-Based Risk Alert Generation**
+*For any* weather forecast indicating frost risk, heatwave risk, or heavy rain risk, the Platform should send weather-based risk alerts to the farmer including protective action recommendations.
+**Validates: Requirements 15.11, 15.12, 15.13, 15.14**
+
+**Property 53: Alert Prioritization**
+*For any* situation where multiple risk factors are present simultaneously, the Platform should prioritize alerts by severity and time sensitivity, with higher severity and more time-sensitive alerts appearing first.
+**Validates: Requirements 15.16**
+
 ## Error Handling
 
 ### Error Categories
@@ -618,23 +1311,36 @@ interface FarmerInputRecord {
    - Government API timeout (408 Request Timeout)
    - Invalid API response format (422 Unprocessable Entity)
    - Rate limiting exceeded (429 Too Many Requests)
+   - Weather API unavailable (503 Service Unavailable)
+   - Market price API unavailable (503 Service Unavailable)
 
 2. **Validation Errors:**
    - Missing required fields (400 Bad Request)
    - Out-of-range numeric values (400 Bad Request)
    - Invalid soil type selection (400 Bad Request)
    - Invalid location identifier (404 Not Found)
+   - Invalid soil test results format (400 Bad Request)
+   - Invalid date range for calendar generation (400 Bad Request)
 
 3. **Processing Errors:**
    - AI model inference failure (500 Internal Server Error)
    - Insufficient data for recommendations (422 Unprocessable Entity)
    - Database connection failure (503 Service Unavailable)
    - Cache service unavailable (degraded mode, continue with API calls)
+   - Calendar generation failure (500 Internal Server Error)
+   - PDF export failure (500 Internal Server Error)
+   - Alert delivery failure (503 Service Unavailable)
 
 4. **Authentication Errors:**
    - Missing or invalid JWT token (401 Unauthorized)
    - Expired token (401 Unauthorized)
    - Insufficient permissions (403 Forbidden)
+
+5. **Business Logic Errors:**
+   - Sowing window not available for selected crop/region (404 Not Found)
+   - Soil test results too old (>1 year) (422 Unprocessable Entity)
+   - Crop not suitable for selected region (422 Unprocessable Entity)
+   - Market price data unavailable for crop (404 Not Found)
 
 ### Error Response Format
 
@@ -776,10 +1482,104 @@ test('Empty TDS value should return specific error message', async () => {
 });
 ```
 
+**Example Property Test for New Features:**
+
+```typescript
+import fc from 'fast-check';
+
+// Feature: ai-crop-intelligence-platform, Property 35: Sowing Calendar Generation
+test('Property 35: Sowing calendar should contain optimal windows with dates', () => {
+  fc.assert(
+    fc.property(
+      fc.record({
+        cropName: fc.constantFrom('wheat', 'rice', 'cotton', 'sugarcane', 'maize'),
+        regionalData: fc.record({
+          locationId: fc.string(),
+          monsoonOnset: fc.date(),
+          monsoonWithdrawal: fc.date(),
+          averageRainfall: fc.float({ min: 0, max: 3000 })
+        })
+      }),
+      async ({ cropName, regionalData }) => {
+        const calendar = await aiEngine.generateSowingCalendar(cropName, regionalData);
+        
+        expect(calendar.sowingWindows).toBeDefined();
+        expect(calendar.sowingWindows.length).toBeGreaterThan(0);
+        
+        calendar.sowingWindows.forEach(window => {
+          expect(window.startDate).toBeInstanceOf(Date);
+          expect(window.endDate).toBeInstanceOf(Date);
+          expect(window.startDate.getTime()).toBeLessThan(window.endDate.getTime());
+        });
+        
+        expect(calendar.monsoonPatternData).toBeDefined();
+      }
+    ),
+    { numRuns: 100 }
+  );
+});
+
+// Feature: ai-crop-intelligence-platform, Property 43: Urea Over-Application Prevention
+test('Property 43: Urea doses should not exceed safe limits', () => {
+  fc.assert(
+    fc.property(
+      fc.record({
+        cropName: fc.constantFrom('wheat', 'rice', 'cotton'),
+        soilTestResults: fc.record({
+          nitrogenPpm: fc.float({ min: 0, max: 500 }),
+          phosphorusPpm: fc.float({ min: 0, max: 100 }),
+          potassiumPpm: fc.float({ min: 0, max: 500 }),
+          phLevel: fc.float({ min: 4, max: 9 })
+        })
+      }),
+      async ({ cropName, soilTestResults }) => {
+        const plan = await aiEngine.calculateNutrientManagementPlan(cropName, soilTestResults);
+        
+        const ureaDose = plan.fertilizerDoses.find(d => d.fertilizerType === 'Urea');
+        
+        if (ureaDose) {
+          // Safe limits vary by crop, but generally max 200 kg/hectare
+          const safeLimit = cropName === 'rice' ? 250 : 200;
+          expect(ureaDose.totalQuantityKgPerHectare).toBeLessThanOrEqual(safeLimit);
+        }
+      }
+    ),
+    { numRuns: 100 }
+  );
+});
+
+// Feature: ai-crop-intelligence-platform, Property 49: Outbreak Alert Triggering
+test('Property 49: Alerts should be sent when outbreak probability exceeds 60%', () => {
+  fc.assert(
+    fc.property(
+      fc.record({
+        pestProbability: fc.float({ min: 0, max: 100 }),
+        diseaseProbability: fc.float({ min: 0, max: 100 })
+      }),
+      async ({ pestProbability, diseaseProbability }) => {
+        const riskAssessment = {
+          pestRisks: [{ outbreakProbability: pestProbability }],
+          diseaseRisks: [{ outbreakProbability: diseaseProbability }]
+        };
+        
+        const alerts = await alertScheduler.checkRiskThresholdAlerts(riskAssessment);
+        
+        const shouldHaveAlert = pestProbability > 60 || diseaseProbability > 60;
+        
+        if (shouldHaveAlert) {
+          expect(alerts.length).toBeGreaterThan(0);
+        }
+      }
+    ),
+    { numRuns: 100 }
+  );
+});
+```
+
 ### Test Coverage Goals
 
 - **Code Coverage**: Minimum 80% line coverage
-- **Property Coverage**: All 34 correctness properties must have corresponding property tests
+- **Property Coverage**: All 53 correctness properties must have corresponding property tests
 - **Integration Coverage**: All API endpoints must have integration tests
 - **Error Path Coverage**: All error handling paths must be tested
 

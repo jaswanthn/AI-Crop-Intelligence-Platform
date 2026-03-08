@@ -15,8 +15,21 @@ The AI-Powered Crop Intelligence Platform is a software-first solution designed 
 - **AI_Engine**: Component that analyzes combined data and generates recommendations
 - **Crop_Suitability_Score**: Numerical value (0-100) indicating how suitable a crop is for given conditions
 - **TDS**: Total Dissolved Solids measurement in water
-- **Regional_Data**: Government-provided data including water table levels, mineral content, and soil district information
+- **Regional_Data**: Government-provided data including water table levels, mineral content, soil district information, climate patterns, and weather forecasts
 - **Manual_Input**: Data entered by farmers including TDS, pH, borewell depth, and soil type
+- **Sowing_Calendar**: Crop-specific schedule indicating optimal planting dates based on regional climate and monsoon patterns
+- **Irrigation_Schedule**: Day-by-day water application plan optimized for crop growth stages
+- **NPK**: Nitrogen, Phosphorus, and Potassium - the three primary macronutrients in fertilizers
+- **Urea**: Nitrogen-based fertilizer with 46 percent nitrogen content
+- **DAP**: Di-Ammonium Phosphate fertilizer containing nitrogen and phosphorus
+- **Basal_Application**: Initial fertilizer dose applied at the time of sowing or planting
+- **Top_Dressing**: Supplemental fertilizer application during crop growth stages after initial planting
+- **Soil_Test_Results**: Laboratory analysis data showing nutrient levels and chemical properties of soil
+- **Split_Dose**: Fertilizer application strategy dividing total dose into multiple applications at different growth stages
+- **Pest_Outbreak_Probability**: Numerical likelihood (0-100 percent) of pest infestation based on weather and crop conditions
+- **Growth_Stage**: Specific phase in crop development cycle such as germination, vegetative, flowering, or maturity
+- **Market_Price_Trends**: Historical and current commodity price data used for harvest timing optimization
+- **Weather_Based_Risk_Alert**: Notification about adverse weather conditions that may damage crops
 
 ## Requirements
 
@@ -175,3 +188,65 @@ The AI-Powered Crop Intelligence Platform is a software-first solution designed 
 3. THE Platform SHALL design database schema to accommodate sensor metadata including device ID and timestamp
 4. THE Platform SHALL implement API endpoints that can accept data from external IoT devices
 5. WHEN IoT devices are integrated in the future, THE Platform SHALL continue supporting manual input as a fallback option
+
+### Requirement 13: Sowing and Irrigation Calendars
+
+**User Story:** As a farmer, I want precision sowing and irrigation calendars based on my region and crop, so that I can optimize planting timing and water usage throughout the growing season.
+
+#### Acceptance Criteria
+
+1. WHEN the AI_Engine receives crop type and Regional_Data, THE AI_Engine SHALL generate a crop-specific sowing calendar based on regional climate patterns
+2. WHEN generating a sowing calendar, THE AI_Engine SHALL incorporate monsoon pattern data from Regional_Data
+3. WHEN generating a sowing calendar, THE AI_Engine SHALL identify optimal sowing windows with start and end dates
+4. WHEN weather forecast data indicates favorable conditions, THE AI_Engine SHALL generate alerts for optimal sowing timing
+5. WHEN the AI_Engine receives crop type and growth stage data, THE AI_Engine SHALL generate a day-by-day irrigation schedule
+6. WHEN generating an irrigation schedule, THE AI_Engine SHALL optimize water application for each crop growth stage
+7. WHEN generating an irrigation schedule, THE AI_Engine SHALL specify irrigation dates and water volumes in liters per hectare
+8. THE Platform SHALL provide calendar export functionality in standard calendar formats
+9. THE Platform SHALL provide calendar download functionality for offline reference as PDF
+10. WHEN a sowing window approaches within 7 days, THE Platform SHALL send alerts to the Farmer
+11. WHEN displaying calendars, THE Platform SHALL present information in the user's selected language
+
+### Requirement 14: Nutrient Management and Fertilizer Dose Calculator
+
+**User Story:** As a farmer, I want precise fertilizer dose calculations based on my soil test results, so that I can prevent Urea over-application and maintain soil health while reducing costs.
+
+#### Acceptance Criteria
+
+1. WHEN the AI_Engine receives soil test results, THE AI_Engine SHALL calculate precise fertilizer doses for NPK components
+2. WHEN the AI_Engine receives soil test results, THE AI_Engine SHALL calculate precise fertilizer doses for Urea
+3. WHEN the AI_Engine receives soil test results, THE AI_Engine SHALL calculate precise fertilizer doses for DAP
+4. WHEN the AI_Engine receives soil test results, THE AI_Engine SHALL calculate precise fertilizer doses for other required fertilizers
+5. WHEN calculating Urea doses, THE AI_Engine SHALL prevent over-application by limiting doses to agronomically safe levels
+6. WHEN generating fertilizer recommendations, THE AI_Engine SHALL provide split-dose recommendations including basal application
+7. WHEN generating fertilizer recommendations, THE AI_Engine SHALL provide split-dose recommendations including top-dressing applications
+8. WHEN generating split-dose recommendations, THE AI_Engine SHALL specify exact timing in days after sowing
+9. WHEN generating split-dose recommendations, THE AI_Engine SHALL specify quantities in kilograms per hectare for each application
+10. WHEN displaying fertilizer recommendations, THE Platform SHALL show cost estimates based on current market prices
+11. WHEN generating fertilizer recommendations, THE AI_Engine SHALL provide organic fertilizer alternatives with equivalent nutrient values
+12. WHEN displaying organic alternatives, THE Platform SHALL specify application rates and expected outcomes
+13. IF soil test results indicate excessive Urea application risk, THEN THE AI_Engine SHALL display warnings about soil health damage
+14. WHEN displaying fertilizer recommendations, THE Platform SHALL present information in the user's selected language
+
+### Requirement 15: Risk Mitigation and Harvest Optimization
+
+**User Story:** As a farmer, I want early warnings about pest outbreaks and optimal harvest timing recommendations, so that I can protect my crops and maximize yield and market returns.
+
+#### Acceptance Criteria
+
+1. WHEN the AI_Engine receives weather pattern data and crop stage information, THE AI_Engine SHALL predict pest outbreak probability
+2. WHEN the AI_Engine receives weather pattern data and crop stage information, THE AI_Engine SHALL predict disease outbreak probability
+3. WHEN pest outbreak probability exceeds 60 percent, THE Platform SHALL send early warning alerts to the Farmer
+4. WHEN disease outbreak probability exceeds 60 percent, THE Platform SHALL send early warning alerts to the Farmer
+5. WHEN generating pest alerts, THE AI_Engine SHALL identify specific pest types including bollworm and aphids
+6. WHEN generating pest alerts, THE AI_Engine SHALL provide preventive measures in the alert message
+7. WHEN generating pest alerts, THE AI_Engine SHALL provide treatment recommendations in the alert message
+8. WHEN the AI_Engine receives crop maturity data and market price trends, THE AI_Engine SHALL recommend optimal harvest timing
+9. WHEN recommending harvest timing, THE AI_Engine SHALL consider yield maximization factors
+10. WHEN recommending harvest timing, THE AI_Engine SHALL consider market price optimization factors
+11. WHEN weather forecasts indicate frost risk, THE Platform SHALL send weather-based risk alerts to the Farmer
+12. WHEN weather forecasts indicate heatwave risk, THE Platform SHALL send weather-based risk alerts to the Farmer
+13. WHEN weather forecasts indicate heavy rain risk, THE Platform SHALL send weather-based risk alerts to the Farmer
+14. WHEN sending weather-based risk alerts, THE Platform SHALL include protective action recommendations
+15. WHEN displaying risk alerts and recommendations, THE Platform SHALL present information in the user's selected language
+16. WHEN multiple risk factors are present, THE Platform SHALL prioritize alerts by severity and time sensitivity

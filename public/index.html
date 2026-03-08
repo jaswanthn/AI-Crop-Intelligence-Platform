@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -41,6 +41,60 @@
             font-size: 14px;
         }
 
+        .language-toggle {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .language-toggle button {
+            padding: 8px 20px;
+            margin: 0 5px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .language-toggle button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 20px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         .form-group {
             margin-bottom: 20px;
         }
@@ -53,16 +107,17 @@
             font-size: 14px;
         }
 
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 16px;
             transition: border-color 0.3s;
+            font-family: inherit;
         }
 
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -87,6 +142,11 @@
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            margin-top: 10px;
         }
 
         .results {
@@ -151,142 +211,947 @@
             display: block;
         }
 
-        .language-toggle {
-            text-align: center;
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .export-buttons button {
+            flex: 1;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
             margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 14px;
         }
 
-        .language-toggle button {
-            padding: 8px 20px;
-            margin: 0 5px;
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            font-size: 14px;
         }
 
-        .language-toggle button.active {
-            background: #667eea;
-            color: white;
+        @media (max-width: 600px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                min-width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🌾 AI Crop Intelligence Platform</h1>
-        <p class="subtitle">Get AI-powered crop recommendations for your farm</p>
+        <p class="subtitle">Get AI-powered crop recommendations and precision agriculture insights</p>
 
         <div class="language-toggle">
             <button onclick="setLanguage('en')" class="active" id="btn-en">English</button>
             <button onclick="setLanguage('hi')" id="btn-hi">हिंदी</button>
         </div>
 
-        <form id="farmerForm">
-            <div class="form-group">
-                <label for="tdsValue">Water TDS Value (ppm)</label>
-                <input type="number" id="tdsValue" name="tdsValue" min="0" max="5000" required 
-                       placeholder="Enter TDS value (0-5000)">
-            </div>
-
-            <div class="form-group">
-                <label for="phLevel">Soil pH Level</label>
-                <input type="number" id="phLevel" name="phLevel" min="0" max="14" step="0.1" required 
-                       placeholder="Enter pH level (0-14)">
-            </div>
-
-            <div class="form-group">
-                <label for="borewellDepth">Borewell Depth (meters)</label>
-                <input type="number" id="borewellDepth" name="borewellDepth" min="0" max="500" required 
-                       placeholder="Enter borewell depth">
-            </div>
-
-            <div class="form-group">
-                <label for="soilType">Soil Type</label>
-                <select id="soilType" name="soilType" required>
-                    <option value="">Select soil type</option>
-                    <option value="clay">Clay (चिकनी मिट्टी)</option>
-                    <option value="sandy">Sandy (रेतीली मिट्टी)</option>
-                    <option value="loamy">Loamy (दोमट मिट्टी)</option>
-                    <option value="silty">Silty (गाद मिट्टी)</option>
-                    <option value="peaty">Peaty (पीटयुक्त मिट्टी)</option>
-                    <option value="chalky">Chalky (चाकयुक्त मिट्टी)</option>
-                    <option value="laterite">Laterite (लैटेराइट मिट्टी)</option>
-                </select>
-            </div>
-
-            <button type="submit" class="btn" id="submitBtn">Get Recommendations</button>
-        </form>
-
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p style="margin-top: 15px; color: #666;">Analyzing your farm data...</p>
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('recommendations')">🌱 Crop Recommendations</button>
+            <button class="tab" onclick="switchTab('calendar')">📅 Sowing Calendar</button>
+            <button class="tab" onclick="switchTab('irrigation')">💧 Irrigation Schedule</button>
+            <button class="tab" onclick="switchTab('nutrients')">🧪 Fertilizer Calculator</button>
+            <button class="tab" onclick="switchTab('risks')">⚠️ Risk Assessment</button>
         </div>
 
-        <div class="error" id="error"></div>
+        <!-- Tab 1: Crop Recommendations -->
+        <div id="tab-recommendations" class="tab-content active">
+            <form id="recommendationsForm">
+                <div class="form-group">
+                    <label for="tdsValue">Water TDS Value (ppm)</label>
+                    <input type="number" id="tdsValue" name="tdsValue" min="0" max="5000" required 
+                           placeholder="Enter TDS value (0-5000)">
+                </div>
 
-        <div class="results" id="results">
-            <h2>📊 Recommendations</h2>
-            <div class="results-content" id="resultsContent"></div>
+                <div class="form-group">
+                    <label for="phLevel">Soil pH Level</label>
+                    <input type="number" id="phLevel" name="phLevel" min="0" max="14" step="0.1" required 
+                           placeholder="Enter pH level (0-14)">
+                </div>
+
+                <div class="form-group">
+                    <label for="borewellDepth">Borewell Depth (meters)</label>
+                    <input type="number" id="borewellDepth" name="borewellDepth" min="0" max="500" required 
+                           placeholder="Enter borewell depth">
+                </div>
+
+                <div class="form-group">
+                    <label for="soilType">Soil Type</label>
+                    <select id="soilType" name="soilType" required>
+                        <option value="">Select soil type</option>
+                        <option value="clay">Clay (चिकनी मिट्टी)</option>
+                        <option value="sandy">Sandy (रेतीली मिट्टी)</option>
+                        <option value="loamy">Loamy (दोमट मिट्टी)</option>
+                        <option value="silty">Silty (गाद मिट्टी)</option>
+                        <option value="peaty">Peaty (पीटयुक्त मिट्टी)</option>
+                        <option value="chalky">Chalky (चाकयुक्त मिट्टी)</option>
+                        <option value="laterite">Laterite (लैटेराइट मिट्टी)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn">Get Recommendations</button>
+            </form>
+
+            <div class="loading" id="loading-recommendations">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px; color: #666;">Analyzing your farm data...</p>
+            </div>
+
+            <div class="error" id="error-recommendations"></div>
+
+            <div class="results" id="results-recommendations">
+                <h2>📊 Recommendations</h2>
+                <div class="results-content" id="content-recommendations"></div>
+                
+                <!-- Crop Selection for detailed analysis -->
+                <div id="crop-selection" style="display:none; margin-top: 20px; padding: 20px; background: #e3f2fd; border-radius: 8px;">
+                    <h3 style="margin-bottom: 10px; color: #333;">✨ Select a crop for detailed analysis:</h3>
+                    <p style="margin-bottom: 15px; color: #666; font-size: 14px;">
+                        Based on your farm conditions, these crops are recommended:
+                    </p>
+                    <select id="selectedCrop" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #2196f3; border-radius: 8px; font-size: 16px;">
+                        <option value="">Choose a crop...</option>
+                    </select>
+                    <button onclick="generateAllDetails()" class="btn" style="background: #2196f3;">
+                        🚀 Generate Complete Analysis for Selected Crop
+                    </button>
+                    <p style="margin-top: 10px; color: #666; font-size: 12px;">
+                        This will generate: Sowing Calendar, Irrigation Schedule, Fertilizer Plan, and Risk Assessment
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Sowing Calendar -->
+        <div id="tab-calendar" class="tab-content">
+            <div class="info-box" id="calendar-info">
+                📅 Get optimal sowing windows based on regional monsoon patterns and climate data
+                <div id="calendar-autofill" style="display:none; margin-top:10px; color:#2196f3; font-weight:600;">
+                    ✅ Auto-filled from your farm data
+                </div>
+            </div>
+
+            <form id="calendarForm">
+                <div class="form-group">
+                    <label for="calendarCrop">Crop Name</label>
+                    <input type="text" id="calendarCrop" required placeholder="e.g., Wheat, Rice, Cotton">
+                </div>
+
+                <div class="form-group">
+                    <label for="calendarLocation">Location ID</label>
+                    <input type="text" id="calendarLocation" required placeholder="e.g., Maharashtra-Pune">
+                </div>
+
+                <button type="submit" class="btn">Generate Sowing Calendar</button>
+            </form>
+
+            <div class="loading" id="loading-calendar">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px; color: #666;">Generating sowing calendar...</p>
+            </div>
+
+            <div class="error" id="error-calendar"></div>
+
+            <div class="results" id="results-calendar">
+                <h2>📅 Sowing Calendar</h2>
+                <div class="results-content" id="content-calendar"></div>
+                <div class="export-buttons">
+                    <button class="btn btn-secondary" onclick="exportCalendar('pdf')">📄 Download PDF</button>
+                    <button class="btn btn-secondary" onclick="exportCalendar('ical')">📆 Download iCal</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: Irrigation Schedule -->
+        <div id="tab-irrigation" class="tab-content">
+            <div class="info-box" id="irrigation-info">
+                💧 Get day-by-day irrigation schedule optimized for each crop growth stage
+                <div id="irrigation-autofill" style="display:none; margin-top:10px; color:#2196f3; font-weight:600;">
+                    ✅ Auto-filled from your farm data
+                </div>
+            </div>
+
+            <form id="irrigationForm">
+                <div class="form-group">
+                    <label for="irrigationCrop">Crop Name</label>
+                    <input type="text" id="irrigationCrop" required placeholder="e.g., Wheat, Rice, Cotton">
+                </div>
+
+                <div class="form-group">
+                    <label for="growthStage">Growth Stage</label>
+                    <select id="growthStage" required>
+                        <option value="">Select growth stage</option>
+                        <option value="germination">Germination</option>
+                        <option value="vegetative">Vegetative</option>
+                        <option value="flowering">Flowering</option>
+                        <option value="maturity">Maturity</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="irrigationLocation">Location ID</label>
+                    <input type="text" id="irrigationLocation" required placeholder="e.g., Maharashtra-Pune">
+                </div>
+
+                <button type="submit" class="btn">Generate Irrigation Schedule</button>
+            </form>
+
+            <div class="loading" id="loading-irrigation">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px; color: #666;">Generating irrigation schedule...</p>
+            </div>
+
+            <div class="error" id="error-irrigation"></div>
+
+            <div class="results" id="results-irrigation">
+                <h2>💧 Irrigation Schedule</h2>
+                <div class="results-content" id="content-irrigation"></div>
+                <div class="export-buttons">
+                    <button class="btn btn-secondary" onclick="exportIrrigation('pdf')">📄 Download PDF</button>
+                    <button class="btn btn-secondary" onclick="exportIrrigation('ical')">📆 Download iCal</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Fertilizer Calculator -->
+        <div id="tab-nutrients" class="tab-content">
+            <div class="info-box" id="nutrients-info">
+                🧪 Calculate precise fertilizer doses based on soil test results. Prevents Urea over-application.
+                <div id="nutrients-autofill" style="display:none; margin-top:10px; color:#2196f3; font-weight:600;">
+                    ✅ Auto-filled from your farm data (pH level and recommended crop)
+                </div>
+            </div>
+
+            <form id="nutrientsForm">
+                <div class="form-group">
+                    <label for="nutrientsCrop">Crop Name</label>
+                    <input type="text" id="nutrientsCrop" required placeholder="e.g., Wheat, Rice, Cotton">
+                </div>
+
+                <h3 style="margin: 20px 0 10px; color: #333; font-size: 16px;">Soil Test Results</h3>
+
+                <div class="form-group">
+                    <label for="nitrogen">Nitrogen (ppm)</label>
+                    <input type="number" id="nitrogen" required placeholder="e.g., 250" step="0.1">
+                </div>
+
+                <div class="form-group">
+                    <label for="phosphorus">Phosphorus (ppm)</label>
+                    <input type="number" id="phosphorus" required placeholder="e.g., 15" step="0.1">
+                </div>
+
+                <div class="form-group">
+                    <label for="potassium">Potassium (ppm)</label>
+                    <input type="number" id="potassium" required placeholder="e.g., 120" step="0.1">
+                </div>
+
+                <div class="form-group">
+                    <label for="nutrientsPh">pH Level</label>
+                    <input type="number" id="nutrientsPh" required placeholder="e.g., 6.5" step="0.1" min="0" max="14">
+                </div>
+
+                <div class="form-group">
+                    <label for="organicCarbon">Organic Carbon (%)</label>
+                    <input type="number" id="organicCarbon" placeholder="Optional" step="0.01">
+                </div>
+
+                <button type="submit" class="btn">Calculate Fertilizer Doses</button>
+            </form>
+
+            <div class="loading" id="loading-nutrients">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px; color: #666;">Calculating fertilizer recommendations...</p>
+            </div>
+
+            <div class="error" id="error-nutrients"></div>
+
+            <div class="results" id="results-nutrients">
+                <h2>🧪 Fertilizer Recommendations</h2>
+                <div class="results-content" id="content-nutrients"></div>
+            </div>
+        </div>
+
+        <!-- Tab 5: Risk Assessment -->
+        <div id="tab-risks" class="tab-content">
+            <div class="info-box">
+                ⚠️ Get early warnings for pest outbreaks, weather risks, and optimal harvest timing
+            </div>
+
+            <form id="risksForm">
+                <div class="form-group">
+                    <label for="risksCrop">Crop Name</label>
+                    <input type="text" id="risksCrop" required placeholder="e.g., Wheat, Rice, Cotton">
+                </div>
+
+                <div class="form-group">
+                    <label for="risksGrowthStage">Growth Stage</label>
+                    <select id="risksGrowthStage" required>
+                        <option value="">Select growth stage</option>
+                        <option value="germination">Germination</option>
+                        <option value="vegetative">Vegetative</option>
+                        <option value="flowering">Flowering</option>
+                        <option value="maturity">Maturity</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="risksLocation">Location ID</label>
+                    <input type="text" id="risksLocation" required placeholder="e.g., Maharashtra-Pune">
+                </div>
+
+                <button type="submit" class="btn">Assess Risks</button>
+            </form>
+
+            <div class="loading" id="loading-risks">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px; color: #666;">Assessing risks...</p>
+            </div>
+
+            <div class="error" id="error-risks"></div>
+
+            <div class="results" id="results-risks">
+                <h2>⚠️ Risk Assessment</h2>
+                <div class="results-content" id="content-risks"></div>
+            </div>
         </div>
     </div>
 
     <script>
         let currentLanguage = 'en';
+        let currentCalendarId = null;
+        let currentIrrigationId = null;
+        
+        // Store farmer's input data for auto-population
+        let farmerData = {
+            tdsValue: null,
+            phLevel: null,
+            borewellDepth: null,
+            soilType: null,
+            locationId: null,
+            recommendedCrops: []
+        };
 
         function setLanguage(lang) {
             currentLanguage = lang;
             document.getElementById('btn-en').classList.toggle('active', lang === 'en');
             document.getElementById('btn-hi').classList.toggle('active', lang === 'hi');
         }
-
-        document.getElementById('farmerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const formData = {
-                tdsValue: parseFloat(document.getElementById('tdsValue').value),
-                phLevel: parseFloat(document.getElementById('phLevel').value),
-                borewellDepth: parseFloat(document.getElementById('borewellDepth').value),
-                soilType: document.getElementById('soilType').value,
-                language: currentLanguage
+        
+        // Auto-populate location ID based on soil type and region (simplified)
+        function deriveLocationId(soilType) {
+            // Simple mapping - in production, this would be more sophisticated
+            const locationMap = {
+                'clay': 'Maharashtra-Pune',
+                'sandy': 'Rajasthan-Jaipur',
+                'loamy': 'Punjab-Ludhiana',
+                'silty': 'West Bengal-Kolkata',
+                'peaty': 'Kerala-Kochi',
+                'chalky': 'Haryana-Gurgaon',
+                'laterite': 'Karnataka-Bangalore'
             };
-
-            // Show loading, hide results and errors
-            document.getElementById('loading').classList.add('show');
-            document.getElementById('results').classList.remove('show');
-            document.getElementById('error').classList.remove('show');
-            document.getElementById('submitBtn').disabled = true;
-
+            return locationMap[soilType] || 'Maharashtra-Pune';
+        }
+        
+        // Extract crop names from recommendations text
+        function extractCropNames(recommendationsText) {
+            // Enhanced extraction - looks for common crop names with better pattern matching
+            const crops = [
+                'Wheat', 'Rice', 'Cotton', 'Sugarcane', 'Maize', 'Corn',
+                'Soybean', 'Groundnut', 'Peanut', 'Pulses', 'Barley', 
+                'Millets', 'Sorghum', 'Jowar', 'Bajra', 'Ragi',
+                'Chickpea', 'Pigeon Pea', 'Lentil', 'Mustard', 'Sunflower',
+                'Potato', 'Tomato', 'Onion', 'Chilli', 'Pepper'
+            ];
+            
+            const found = new Set(); // Use Set to avoid duplicates
+            const lowerText = recommendationsText.toLowerCase();
+            
+            crops.forEach(crop => {
+                // Check for crop name with word boundaries
+                const pattern = new RegExp(`\\b${crop.toLowerCase()}\\b`, 'i');
+                if (pattern.test(lowerText)) {
+                    found.add(crop);
+                }
+            });
+            
+            // Convert Set to Array and limit to top 5 crops
+            const foundArray = Array.from(found).slice(0, 5);
+            
+            // If no crops found, provide common defaults based on context
+            if (foundArray.length === 0) {
+                console.warn('No crops detected in recommendations, using defaults');
+                return ['Wheat', 'Rice', 'Cotton'];
+            }
+            
+            console.log('Extracted crops:', foundArray);
+            return foundArray;
+        }
+        
+        // Populate crop selection dropdown
+        function populateCropSelection(crops) {
+            const select = document.getElementById('selectedCrop');
+            select.innerHTML = '<option value="">Choose a crop...</option>';
+            
+            if (!crops || crops.length === 0) {
+                console.error('No crops provided to populate dropdown');
+                crops = ['Wheat', 'Rice', 'Cotton']; // Fallback
+            }
+            
+            crops.forEach((crop, index) => {
+                const option = document.createElement('option');
+                option.value = crop;
+                option.textContent = `${crop}${index === 0 ? ' (Top Recommendation)' : ''}`;
+                select.appendChild(option);
+            });
+            
+            // Show the crop selection section
+            document.getElementById('crop-selection').style.display = 'block';
+            
+            // Log for debugging
+            console.log('Crop dropdown populated with:', crops);
+        }
+        
+        // Generate all details for selected crop
+        async function generateAllDetails() {
+            const selectedCrop = document.getElementById('selectedCrop').value;
+            if (!selectedCrop) {
+                alert('Please select a crop first');
+                return;
+            }
+            
+            if (!farmerData.locationId) {
+                alert('Please complete Step 1 (Crop Recommendations) first');
+                return;
+            }
+            
+            // Update farmer data with selected crop
+            farmerData.selectedCrop = selectedCrop;
+            
+            // Show loading indicator
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = '⏳ Generating complete analysis...';
+            
             try {
-                const apiUrl = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3000/api/recommendations'
-                    : '/api/recommendations';
+                // Generate all analyses in parallel
+                const results = await Promise.allSettled([
+                    generateSowingCalendarAuto(selectedCrop),
+                    generateIrrigationScheduleAuto(selectedCrop),
+                    generateNutrientPlanAuto(selectedCrop),
+                    generateRiskAssessmentAuto(selectedCrop)
+                ]);
                 
+                // Check for failures
+                const failures = results.filter(r => r.status === 'rejected');
+                if (failures.length > 0) {
+                    console.error('Some analyses failed:', failures);
+                    btn.textContent = '⚠️ Partial Success - Check Results';
+                    btn.style.background = '#ff9800';
+                    alert(`Generated ${4 - failures.length} out of 4 analyses.\n\nFailed: ${failures.length}\n\nCheck the tabs for available results.`);
+                } else {
+                    btn.textContent = '✅ Complete Analysis Generated!';
+                    btn.style.background = '#4caf50';
+                    alert(`Complete analysis for ${selectedCrop} has been generated!\n\nCheck the other tabs:\n📅 Sowing Calendar\n💧 Irrigation Schedule\n🧪 Fertilizer Calculator\n⚠️ Risk Assessment`);
+                }
+                
+            } catch (error) {
+                console.error('Error generating analysis:', error);
+                btn.textContent = '❌ Error - Try Again';
+                btn.style.background = '#f44336';
+                alert('Error generating analysis: ' + error.message + '\n\nPlease check:\n1. Server is running\n2. AWS credentials are valid\n3. Network connection is stable');
+            } finally {
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = '🚀 Generate Complete Analysis for Selected Crop';
+                    btn.style.background = '#2196f3';
+                }, 3000);
+            }
+        }
+        
+        // Auto-generate sowing calendar
+        async function generateSowingCalendarAuto(cropName) {
+            try {
+                const formData = {
+                    cropName: cropName,
+                    locationId: farmerData.locationId,
+                    language: currentLanguage
+                };
+
+                const apiUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000/api/v1/calendar/sowing'
+                    : '/api/v1/calendar/sowing';
+
                 const response = await fetch(apiUrl, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    currentCalendarId = data.calendar.calendarId;
+                    document.getElementById('content-calendar').textContent = data.calendar.recommendations;
+                    document.getElementById('results-calendar').classList.add('show');
+                    if (document.getElementById('calendar-autofill')) {
+                        document.getElementById('calendar-autofill').style.display = 'block';
+                    }
+                } else {
+                    throw new Error(data.error || 'Failed to generate sowing calendar');
+                }
+            } catch (error) {
+                console.error('Sowing calendar error:', error);
+                throw error;
+            }
+        }
+        
+        // Auto-generate irrigation schedule
+        async function generateIrrigationScheduleAuto(cropName) {
+            try {
+                const formData = {
+                    cropName: cropName,
+                    growthStage: 'vegetative',
+                    locationId: farmerData.locationId,
+                    language: currentLanguage
+                };
+
+                const apiUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000/api/v1/calendar/irrigation'
+                    : '/api/v1/calendar/irrigation';
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    currentIrrigationId = data.schedule.scheduleId;
+                    document.getElementById('content-irrigation').textContent = data.schedule.recommendations;
+                    document.getElementById('results-irrigation').classList.add('show');
+                    if (document.getElementById('irrigation-autofill')) {
+                        document.getElementById('irrigation-autofill').style.display = 'block';
+                    }
+                } else {
+                    throw new Error(data.error || 'Failed to generate irrigation schedule');
+                }
+            } catch (error) {
+                console.error('Irrigation schedule error:', error);
+                throw error;
+            }
+        }
+        
+        // Auto-generate nutrient management plan
+        async function generateNutrientPlanAuto(cropName) {
+            try {
+                const formData = {
+                    cropName: cropName,
+                    soilTestResults: {
+                        nitrogenPpm: 250,
+                        phosphorusPpm: 15,
+                        potassiumPpm: 120,
+                        phLevel: farmerData.phLevel || 6.5
                     },
+                    language: currentLanguage
+                };
+
+                const apiUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000/api/v1/nutrient-management/calculate'
+                    : '/api/v1/nutrient-management/calculate';
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('content-nutrients').textContent = data.plan.recommendations;
+                    document.getElementById('results-nutrients').classList.add('show');
+                } else {
+                    throw new Error(data.error || 'Failed to generate nutrient plan');
+                }
+            } catch (error) {
+                console.error('Nutrient plan error:', error);
+                throw error;
+            }
+        }
+        
+        // Auto-generate risk assessment
+        async function generateRiskAssessmentAuto(cropName) {
+            try {
+                const formData = {
+                    cropName: cropName,
+                    growthStage: 'vegetative',
+                    locationId: farmerData.locationId,
+                    language: currentLanguage
+                };
+
+                const apiUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000/api/v1/risk-assessment'
+                    : '/api/v1/risk-assessment';
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('content-risks').textContent = data.assessment.recommendations;
+                    document.getElementById('results-risks').classList.add('show');
+                } else {
+                    throw new Error(data.error || 'Failed to generate risk assessment');
+                }
+            } catch (error) {
+                console.error('Risk assessment error:', error);
+                throw error;
+            }
+        }
+        
+        // Auto-populate other tabs when data is available
+        function autoPopulateTabs() {
+            if (!farmerData.locationId) return;
+            
+            // Auto-populate Sowing Calendar
+            if (farmerData.recommendedCrops.length > 0) {
+                document.getElementById('calendarCrop').value = farmerData.recommendedCrops[0];
+            }
+            document.getElementById('calendarLocation').value = farmerData.locationId;
+            
+            // Auto-populate Irrigation Schedule
+            if (farmerData.recommendedCrops.length > 0) {
+                document.getElementById('irrigationCrop').value = farmerData.recommendedCrops[0];
+            }
+            document.getElementById('irrigationLocation').value = farmerData.locationId;
+            
+            // Auto-populate Fertilizer Calculator
+            if (farmerData.recommendedCrops.length > 0) {
+                document.getElementById('nutrientsCrop').value = farmerData.recommendedCrops[0];
+            }
+            if (farmerData.phLevel) {
+                document.getElementById('nutrientsPh').value = farmerData.phLevel;
+            }
+            
+            // Auto-populate Risk Assessment
+            if (farmerData.recommendedCrops.length > 0) {
+                document.getElementById('risksCrop').value = farmerData.recommendedCrops[0];
+            }
+            document.getElementById('risksLocation').value = farmerData.locationId;
+        }
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Auto-populate when switching tabs (if data is available)
+            if (tabName !== 'recommendations') {
+                autoPopulateTabs();
+            }
+        }
+
+        function getApiUrl(endpoint) {
+            return window.location.hostname === 'localhost' 
+                ? `http://localhost:3000${endpoint}`
+                : endpoint;
+        }
+
+        function showLoading(section) {
+            document.getElementById(`loading-${section}`).classList.add('show');
+            document.getElementById(`results-${section}`).classList.remove('show');
+            document.getElementById(`error-${section}`).classList.remove('show');
+        }
+
+        function hideLoading(section) {
+            document.getElementById(`loading-${section}`).classList.remove('show');
+        }
+
+        function showResults(section, content) {
+            document.getElementById(`content-${section}`).textContent = content;
+            document.getElementById(`results-${section}`).classList.add('show');
+        }
+
+        function showError(section, message) {
+            document.getElementById(`error-${section}`).textContent = 'Error: ' + message;
+            document.getElementById(`error-${section}`).classList.add('show');
+        }
+
+        // Tab 1: Crop Recommendations
+        document.getElementById('recommendationsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading('recommendations');
+
+            try {
+                const formData = {
+                    tdsValue: parseFloat(document.getElementById('tdsValue').value),
+                    phLevel: parseFloat(document.getElementById('phLevel').value),
+                    borewellDepth: parseFloat(document.getElementById('borewellDepth').value),
+                    soilType: document.getElementById('soilType').value,
+                    language: currentLanguage
+                };
+
+                const response = await fetch(getApiUrl('/api/recommendations'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    document.getElementById('resultsContent').textContent = data.recommendations;
-                    document.getElementById('results').classList.add('show');
+                    // Store farmer data for auto-population
+                    farmerData.tdsValue = formData.tdsValue;
+                    farmerData.phLevel = formData.phLevel;
+                    farmerData.borewellDepth = formData.borewellDepth;
+                    farmerData.soilType = formData.soilType;
+                    farmerData.locationId = deriveLocationId(formData.soilType);
+                    farmerData.recommendedCrops = extractCropNames(data.recommendations);
+                    
+                    showResults('recommendations', data.recommendations);
+                    
+                    // Populate crop selection dropdown
+                    populateCropSelection(farmerData.recommendedCrops);
+                    
+                    // Auto-populate other tabs
+                    autoPopulateTabs();
                 } else {
                     throw new Error(data.error || 'Failed to get recommendations');
                 }
             } catch (error) {
-                document.getElementById('error').textContent = 'Error: ' + error.message;
-                document.getElementById('error').classList.add('show');
+                showError('recommendations', error.message);
             } finally {
-                document.getElementById('loading').classList.remove('show');
-                document.getElementById('submitBtn').disabled = false;
+                hideLoading('recommendations');
             }
         });
+
+        // Tab 2: Sowing Calendar
+        document.getElementById('calendarForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading('calendar');
+
+            try {
+                const formData = {
+                    cropName: document.getElementById('calendarCrop').value,
+                    locationId: document.getElementById('calendarLocation').value,
+                    language: currentLanguage
+                };
+
+                const apiUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000/api/v1/calendar/sowing'
+                    : '/api/v1/calendar/sowing';
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentCalendarId = data.calendar.calendarId;
+                    showResults('calendar', data.calendar.recommendations);
+                } else {
+                    throw new Error(data.error || 'Failed to generate calendar');
+                }
+            } catch (error) {
+                showError('calendar', error.message);
+            } finally {
+                hideLoading('calendar');
+            }
+        });
+
+        // Tab 3: Irrigation Schedule
+        document.getElementById('irrigationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading('irrigation');
+
+            try {
+                const formData = {
+                    cropName: document.getElementById('irrigationCrop').value,
+                    growthStage: document.getElementById('growthStage').value,
+                    locationId: document.getElementById('irrigationLocation').value,
+                    language: currentLanguage
+                };
+
+                const apiUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000/api/v1/calendar/irrigation'
+                    : '/api/v1/calendar/irrigation';
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentIrrigationId = data.schedule.scheduleId;
+                    showResults('irrigation', data.schedule.recommendations);
+                } else {
+                    throw new Error(data.error || 'Failed to generate schedule');
+                }
+            } catch (error) {
+                showError('irrigation', error.message);
+            } finally {
+                hideLoading('irrigation');
+            }
+        });
+
+        // Tab 4: Fertilizer Calculator
+        document.getElementById('nutrientsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading('nutrients');
+
+            try {
+                const formData = {
+                    cropName: document.getElementById('nutrientsCrop').value,
+                    soilTestResults: {
+                        nitrogenPpm: parseFloat(document.getElementById('nitrogen').value),
+                        phosphorusPpm: parseFloat(document.getElementById('phosphorus').value),
+                        potassiumPpm: parseFloat(document.getElementById('potassium').value),
+                        phLevel: parseFloat(document.getElementById('nutrientsPh').value),
+                        organicCarbonPercent: document.getElementById('organicCarbon').value ? 
+                            parseFloat(document.getElementById('organicCarbon').value) : null
+                    },
+                    language: currentLanguage
+                };
+
+                const apiUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000/api/v1/nutrient-management/calculate'
+                    : '/api/v1/nutrient-management/calculate';
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showResults('nutrients', data.plan.recommendations);
+                } else {
+                    throw new Error(data.error || 'Failed to calculate fertilizer doses');
+                }
+            } catch (error) {
+                showError('nutrients', error.message);
+            } finally {
+                hideLoading('nutrients');
+            }
+        });
+
+        // Tab 5: Risk Assessment
+        document.getElementById('risksForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading('risks');
+
+            try {
+                const formData = {
+                    cropName: document.getElementById('risksCrop').value,
+                    growthStage: document.getElementById('risksGrowthStage').value,
+                    locationId: document.getElementById('risksLocation').value,
+                    language: currentLanguage
+                };
+
+                const apiUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000/api/v1/risk-assessment'
+                    : '/api/v1/risk-assessment';
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showResults('risks', data.assessment.recommendations);
+                } else {
+                    throw new Error(data.error || 'Failed to assess risks');
+                }
+            } catch (error) {
+                showError('risks', error.message);
+            } finally {
+                hideLoading('risks');
+            }
+        });
+
+        // Export functions
+        function exportCalendar(format) {
+            if (!currentCalendarId) {
+                alert('Please generate a calendar first');
+                return;
+            }
+            window.open(getApiUrl(`/api/v1/calendar/export/${currentCalendarId}?format=${format}`), '_blank');
+        }
+
+        function exportIrrigation(format) {
+            if (!currentIrrigationId) {
+                alert('Please generate an irrigation schedule first');
+                return;
+            }
+            window.open(getApiUrl(`/api/v1/calendar/export/${currentIrrigationId}?format=${format}`), '_blank');
+        }
     </script>
 </body>
 </html>
